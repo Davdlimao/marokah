@@ -1,0 +1,9 @@
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+/* Pastas do app (use tanto Pages quanto Paginas se você tiver as duas) */
+@source "../../../../app/Filament/**/*";
+@source "../../../../resources/views/**/*.blade.php";
+
+/* Vendors que o Tailwind precisa varrer */
+@source "../../../../vendor/filament/**/*.blade.php";
+@source "../../../../vendor/wire-elements/**/*.blade.php";
