@@ -19,11 +19,20 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Closure;
 
+/**
+ * RelationManager responsável por gerenciar as contabilidades relacionadas ao cliente.
+ */
 class ContabilidadeRelationManager extends RelationManager
 {
     protected static string $relationship = 'contabilidades';
     protected static ?string $title = 'Contabilidade';
 
+    /**
+     * Define o formulário de criação/edição de contabilidade.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema->components([
@@ -32,7 +41,6 @@ class ContabilidadeRelationManager extends RelationManager
                 ->maxLength(255)
                 ->columnSpan(6),
 
-            // flags visuais
             Hidden::make('cnpj_ok')->dehydrated(false)->reactive(),
             Hidden::make('cnpj_hint')->dehydrated(false)->reactive(),
             Hidden::make('email_ok')->dehydrated(false)->reactive(),
@@ -96,8 +104,6 @@ class ContabilidadeRelationManager extends RelationManager
 
             TextInput::make('telefone')
                 ->label('Telefone')
-                // dica: para evitar o “[ ]” no fim, use UMA máscara fixa (celular)
-                // ou deixe sem máscara e só valide; aqui vou manter celular padrão:
                 ->mask('(99) 99999-9999')
                 ->live(onBlur: true)
                 ->rules(['nullable', 'regex:/^\D*\d{2}\D*\d{4,5}\D*\d{4}\D*$/'])
@@ -124,6 +130,12 @@ class ContabilidadeRelationManager extends RelationManager
         ])->columns(12);
     }
 
+    /**
+     * Define a tabela de listagem das contabilidades.
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -151,22 +163,26 @@ class ContabilidadeRelationManager extends RelationManager
                 CreateAction::make()->label('Nova contabilidade'),
             ])
             ->recordActions([
-            EditAction::make()->label('Editar'),
-            Action::make('tornarPrincipal')
-                ->label('Definir como principal')
-                ->icon('heroicon-o-star')
-                ->color('warning')
-                ->visible(fn (\App\Models\Contabilidade $record) => ! $record->principal)
-                ->requiresConfirmation()
-                ->action(function (\App\Models\Contabilidade $record) {
-                    \App\Models\Contabilidade::where('empresa_id', $record->empresa_id)->update(['principal' => false]);
-                    $record->update(['principal' => true]);
-                })
-                ->successNotificationTitle('Contabilidade marcada como principal'),
-            DeleteAction::make()->label('Excluir'),
-        ])
-        ->groupedBulkActions([
-            DeleteBulkAction::make(),
-        ]);
+                EditAction::make()->label('Editar'),
+                /**
+                 * Ação para definir a contabilidade como principal.
+                 * Atualiza todas as outras como não principal e marca a selecionada.
+                 */
+                Action::make('tornarPrincipal')
+                    ->label('Definir como principal')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (\App\Models\Contabilidade $record) => ! $record->principal)
+                    ->requiresConfirmation()
+                    ->action(function (\App\Models\Contabilidade $record) {
+                        \App\Models\Contabilidade::where('empresa_id', $record->empresa_id)->update(['principal' => false]);
+                        $record->update(['principal' => true]);
+                    })
+                    ->successNotificationTitle('Contabilidade marcada como principal'),
+                DeleteAction::make()->label('Excluir'),
+            ])
+            ->groupedBulkActions([
+                DeleteBulkAction::make(),
+            ]);
     }
 }

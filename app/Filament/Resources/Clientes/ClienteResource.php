@@ -11,31 +11,75 @@ use Filament\Tables\Table;
 
 class ClienteResource extends Resource
 {
+    /**
+     * Modelo Eloquent associado ao recurso.
+     */
     protected static ?string $model = \App\Models\Cliente::class;
 
-    /** @var string|\BackedEnum|null */
+    /**
+     * Ícone de navegação no painel.
+     *
+     * @var string|\BackedEnum|null
+     */
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
 
-    protected static ?string $modelLabel       = 'Cliente';
+    /**
+     * Rótulo singular do modelo.
+     */
+    protected static ?string $modelLabel = 'Cliente';
+
+    /**
+     * Rótulo plural do modelo.
+     */
     protected static ?string $pluralModelLabel = 'Clientes';
-    protected static ?string $navigationLabel  = 'Clientes';
+
+    /**
+     * Rótulo de navegação no menu.
+     */
+    protected static ?string $navigationLabel = 'Clientes';
+
+    /**
+     * Atributo usado como título do registro.
+     */
     protected static ?string $recordTitleAttribute = 'razao_social';
 
+    /**
+     * Retorna o grupo de navegação do recurso.
+     *
+     * @return \UnitEnum|string|null
+     */
     public static function getNavigationGroup(): \UnitEnum|string|null
     {
         return 'Gestão de clientes';
     }
 
+    /**
+     * Define o schema do formulário do recurso.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function form(Schema $schema): Schema
     {
         return ClienteForm::make($schema);
     }
 
+    /**
+     * Define a tabela de listagem do recurso.
+     *
+     * @param Table $table
+     * @return Table
+     */
     public static function table(Table $table): Table
     {
         return ClientesTable::make($table);
     }
 
+    /**
+     * Retorna os relation managers associados ao recurso.
+     *
+     * @return array
+     */
     public static function getRelations(): array
     {
         return [
@@ -45,6 +89,11 @@ class ClienteResource extends Resource
         ];
     }
 
+    /**
+     * Define as rotas das páginas do recurso.
+     *
+     * @return array
+     */
     public static function getPages(): array
     {
         return [

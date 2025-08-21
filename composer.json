@@ -15,6 +15,7 @@
         "pxlrbt/filament-excel": "^3.1",
         "pxlrbt/filament-spotlight": "^2.0",
         "rupadana/filament-api-service": "^4.0",
+        "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-permission": "^6.21"
     },
     "require-dev": {

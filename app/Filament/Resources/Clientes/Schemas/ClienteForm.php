@@ -10,13 +10,16 @@ use App\Services\CnpjLookup;
 
 class ClienteForm
 {
+    /**
+     * Cria e retorna o schema do formulário de cliente.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public static function make(Schema $schema): Schema
     {
         return $schema
             ->components([
-                // ============================================================
-                // 1) DADOS DO CLIENTE
-                // ============================================================
                 Section::make('Dados do cliente')
                     ->columnSpanFull()
                     ->columns(12)
@@ -35,13 +38,16 @@ class ClienteForm
                         Forms\Components\TextInput::make('cpf_cnpj')
                             ->label('CPF / CNPJ')
                             ->required()
+                            // Remove caracteres não numéricos antes de salvar
                             ->dehydrateStateUsing(fn ($state) => preg_replace('/\D+/', '', (string) $state))
                             ->unique('empresas', 'cpf_cnpj', ignoreRecord: true)
                             ->live(onBlur: true)
+                            // Máscara dinâmica conforme tipo de pessoa
                             ->mask(fn ($get) => $get('tipo_pessoa') === 'PF'
                                 ? '999.999.999-99'
                                 : '99.999.999/9999-99'
                             )
+                            // Validação customizada de CPF/CNPJ
                             ->rules(fn ($get) => [
                                 function (string $attribute, $value, \Closure $fail) use ($get) {
                                     $doc = \App\Support\BrDocuments::onlyDigits($value);
@@ -52,6 +58,7 @@ class ClienteForm
                                     }
                                 },
                             ])
+                            // Ícone de feedback de validação
                             ->suffixIcon(fn ($get) => match ($get('doc_valid')) {
                                 true  => 'heroicon-m-check-circle',
                                 false => 'heroicon-m-x-circle',
@@ -60,6 +67,7 @@ class ClienteForm
                             ->suffixIconColor(fn ($get) => $get('doc_valid') ? 'success' : 'danger')
                             ->hint(fn ($get) => $get('doc_hint'))
                             ->hintColor(fn ($get) => $get('doc_valid') ? 'success' : 'danger')
+                            // Após atualização do campo, valida e tenta preencher dados via CNPJ
                             ->afterStateUpdated(function ($get, $set, ?string $state) {
                                 $doc = BrDocuments::onlyDigits($state);
 
@@ -70,15 +78,12 @@ class ClienteForm
                                     return;
                                 }
 
-                                // PJ
                                 $isValid = BrDocuments::cnpj($doc);
                                 $set('doc_valid', $isValid);
                                 $set('doc_hint', $isValid ? 'CNPJ válido.' : 'CNPJ inválido.');
 
-                                // se válido, tenta auto-preencher (sem bloquear o usuário)
                                 if (! $isValid) return;
 
-                                // evita chamadas repetidas desnecessárias
                                 static $lastDoc = null;
                                 if ($lastDoc === $doc) return;
                                 $lastDoc = $doc;
@@ -86,15 +91,12 @@ class ClienteForm
                                 /** @var \App\Services\CnpjLookup $lookup */
                                 $lookup = app(CnpjLookup::class);
                                 if ($info = $lookup->fetch($doc)) {
-                                    // preenche apenas se os campos estiverem vazios (não sobrescreve o que o usuário já digitou)
                                     if (! $get('razao_social') && ! empty($info['razao_social'])) {
                                         $set('razao_social', $info['razao_social']);
                                     }
                                     if (! $get('nome_fantasia') && ! empty($info['nome_fantasia'])) {
                                         $set('nome_fantasia', $info['nome_fantasia']);
                                     }
-
-                                    // se você quiser já “sugerir” o endereço principal:
                                     if (! $get('end_rua') && ! empty($info['logradouro'])) $set('end_rua', $info['logradouro']);
                                     if (! $get('end_bairro') && ! empty($info['bairro']))   $set('end_bairro', $info['bairro']);
                                     if (! $get('end_cidade') && ! empty($info['municipio']))$set('end_cidade', $info['municipio']);
@@ -117,7 +119,8 @@ class ClienteForm
                         Forms\Components\TextInput::make('inscricao_estadual')
                             ->label('Inscrição Estadual')
                             ->visible(fn ($get) => $get('tipo_pessoa') === 'PJ')
-                            ->disabled(fn ($get) => (bool) $get('ie_isento'))   // desabilita se isento
+                            // Desabilita se marcado como isento
+                            ->disabled(fn ($get) => (bool) $get('ie_isento'))
                             ->helperText(fn ($get) => $get('ie_isento') ? 'IE marcada como isenta.' : null)
                             ->columnSpan(3),
 
@@ -125,9 +128,10 @@ class ClienteForm
                             ->label('IE isento?')
                             ->inline(false)
                             ->live()
+                            // Limpa inscrição estadual ao marcar como isento
                             ->afterStateUpdated(function ($set, $state) {
                                 if ($state) {
-                                    $set('inscricao_estadual', null); // limpa IE ao marcar isento
+                                    $set('inscricao_estadual', null);
                                 }
                             })
                             ->visible(fn ($get) => $get('tipo_pessoa') === 'PJ')
@@ -147,18 +151,16 @@ class ClienteForm
                             ->columnSpan(3),
                     ]),
 
-                // ============================================================
-                // 4) USO DO SISTEMA
-                // ============================================================
                 Section::make('Uso do sistema')
                     ->columnSpanFull()
                     ->columns(12)
                     ->schema([
                         Forms\Components\TextInput::make('contrato')
                             ->label('Contrato (código interno)')
+                            // Gera valor padrão sequencial
                             ->default(fn ($record) => $record?->contrato ?? \App\Models\Cliente::nextContract())
-                            ->readOnly()                 // exibe mas não permite edição
-                            ->mask('999999')             // 6 dígitos (apenas visual)
+                            ->readOnly()
+                            ->mask('999999')
                             ->helperText('Gerado automaticamente em ordem sequencial.')
                             ->columnSpan(4),
 
@@ -181,10 +183,11 @@ class ClienteForm
                                 'loja'     => 'Loja',
                                 'produtor' => 'Produtor',
                             ])
-                            ->placeholder('Selecione...')   // aparece quando estiver nulo
-                            ->nullable()                    // permite null
-                            ->default(null)                 // inicia nulo na criação
-                            ->dehydrated(fn ($state) => filled($state)) // não grava string vazia
+                            ->placeholder('Selecione...')
+                            ->nullable()
+                            ->default(null)
+                            // Não grava string vazia
+                            ->dehydrated(fn ($state) => filled($state))
                             ->native(false)
                             ->columnSpan(2),
 

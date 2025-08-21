@@ -18,11 +18,20 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
 
+/**
+ * Gerencia a relação de pessoas vinculadas ao cliente/empresa.
+ */
 class PessoasRelationManager extends RelationManager
 {
     protected static string $relationship = 'pessoas';
     protected static ?string $title = 'Pessoas';
 
+    /**
+     * Define o formulário de cadastro/edição de pessoas.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -54,7 +63,6 @@ class PessoasRelationManager extends RelationManager
                     ->maxLength(255)
                     ->columnSpan(3),
 
-                // --- flags de feedback ---
                 Hidden::make('cpf_ok')->dehydrated(false)->reactive(),
                 Hidden::make('cpf_hint')->dehydrated(false)->reactive(),
                 Hidden::make('email_ok')->dehydrated(false)->reactive(),
@@ -62,11 +70,10 @@ class PessoasRelationManager extends RelationManager
                 Hidden::make('tel_ok')->dehydrated(false)->reactive(),
                 Hidden::make('tel_hint')->dehydrated(false)->reactive(),
 
-                // CPF
                 TextInput::make('cpf')
                     ->label('CPF')
                     ->mask('999.999.999-99')
-                    ->stripCharacters(['.', '-'])              // salva apenas dígitos
+                    ->stripCharacters(['.', '-'])
                     ->live(onBlur: true)
                     ->rules([
                         function ($attribute, $value, $fail) {
@@ -97,7 +104,6 @@ class PessoasRelationManager extends RelationManager
                     })
                     ->columnSpan(3),
 
-                // E-mail
                 TextInput::make('email')
                     ->label('E-mail')
                     ->email()
@@ -123,13 +129,12 @@ class PessoasRelationManager extends RelationManager
                     })
                     ->columnSpan(4),
 
-                // Telefone fixo
                 TextInput::make('telefone')
                     ->label('Telefone')
-                    ->mask('(99) 9999-9999')                   // máscara amigável
-                    ->stripCharacters(['(', ')', ' ', '-'])    // salva só dígitos
+                    ->mask('(99) 9999-9999')
+                    ->stripCharacters(['(', ')', ' ', '-'])
                     ->live(onBlur: true)
-                    ->rules(['nullable', 'regex:/^\d{10}$/'])        // 10 dígitos (fixo)
+                    ->rules(['nullable', 'regex:/^\d{10}$/'])
                     ->validationMessages([
                         'regex' => 'Telefone inválido.',
                     ])
@@ -150,7 +155,6 @@ class PessoasRelationManager extends RelationManager
                     })
                     ->columnSpan(3),
 
-                // Celular / WhatsApp com validação visual
                 Hidden::make('celular_ok')->dehydrated(false)->reactive(),
                 Hidden::make('celular_hint')->dehydrated(false)->reactive(),
                 TextInput::make('celular')
@@ -158,7 +162,7 @@ class PessoasRelationManager extends RelationManager
                     ->mask('(99) 99999-9999')
                     ->stripCharacters(['(', ')', ' ', '-'])
                     ->live(onBlur: true)
-                    ->rules(['nullable', 'regex:/^\d{11}$/'])        // 11 dígitos (celular)
+                    ->rules(['nullable', 'regex:/^\d{11}$/'])
                     ->validationMessages([
                         'regex' => 'Celular inválido.',
                     ])
@@ -192,6 +196,12 @@ class PessoasRelationManager extends RelationManager
             ->columns(12);
     }
 
+    /**
+     * Define a tabela de exibição das pessoas relacionadas ao cliente.
+     *
+     * @param Table $table
+     * @return Table
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -205,7 +215,7 @@ class PessoasRelationManager extends RelationManager
                 TextColumn::make('principal_label')
                     ->label('Principal')
                     ->state(fn (\App\Models\Pessoa $record) => $record->principal ? 'Principal' : 'Não')
-                    ->badge() // sem argumento
+                    ->badge()
                     ->color(fn (\App\Models\Pessoa $record) => $record->principal ? 'success' : 'warning'),
             ])
             ->headerActions([
@@ -216,7 +226,10 @@ class PessoasRelationManager extends RelationManager
             ->recordActions([
                 EditAction::make()->modalHeading('Editar Pessoa'),
 
-                // <-- AÇÃO "DEFINIR COMO PRINCIPAL"
+                /**
+                 * Ação para definir o contato como principal.
+                 * Desmarca os demais contatos do cliente e marca o selecionado.
+                 */
                 Action::make('tornarPrincipal')
                     ->label('Definir como principal')
                     ->icon('heroicon-o-star')
@@ -224,22 +237,17 @@ class PessoasRelationManager extends RelationManager
                     ->visible(fn (\App\Models\Pessoa $record) => ! $record->principal)
                     ->requiresConfirmation()
                     ->action(function (\App\Models\Pessoa $record) {
-                        // Desmarca todas as outras pessoas do cliente
                         \App\Models\Pessoa::where('empresa_id', $record->empresa_id)
                             ->update(['principal' => false]);
-
-                        // Marca esta como principal
                         $record->update(['principal' => true]);
                     })
                     ->successNotificationTitle('Contato marcado como principal'),
 
-        DeleteAction::make()->label('Excluir'),
-    ])
+                DeleteAction::make()->label('Excluir'),
+            ])
             ->defaultSort('principal', 'desc')
-            
             ->groupedBulkActions([
                 DeleteBulkAction::make()->label('Excluir selecionados'),
             ]);
-    
     }
 }

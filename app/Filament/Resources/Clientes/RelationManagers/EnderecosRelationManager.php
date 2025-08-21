@@ -18,12 +18,18 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Filament\Actions\Action;
 
+/**
+ * Gerencia o relacionamento de endereços do cliente no painel Filament.
+ */
 class EnderecosRelationManager extends RelationManager
 {
     protected static string $relationship = 'enderecos';
     protected static ?string $recordTitleAttribute = 'rua';
     protected static ?string $title = 'Endereços';
 
+    /**
+     * Define o formulário para criação/edição de endereços.
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -45,18 +51,16 @@ class EnderecosRelationManager extends RelationManager
                     ->maxLength(60)
                     ->columnSpan(5),
 
-                // Feedback visual customizado para CEP
                 Hidden::make('cep_ok')->dehydrated(false)->reactive(),
                 Hidden::make('cep_hint')->dehydrated(false)->reactive(),
 
                 TextInput::make('cep')
                     ->label('CEP')
                     ->mask('99999-999')
-                    ->stripCharacters(['-'])     // << garante que vá “13068435” para o banco
+                    ->stripCharacters(['-'])
                     ->live(onBlur: true)
                     ->required()
-                    ->rule('regex:/^\d{5}-?\d{3}$/')     // valida o que o usuário digitou (com ou sem hífen)
-                    // feedback visual
+                    ->rule('regex:/^\d{5}-?\d{3}$/')
                     ->suffixIcon(fn ($get) => match ($get('cep_ok')) {
                         true  => 'heroicon-m-check-circle',
                         false => 'heroicon-m-x-circle',
@@ -69,6 +73,9 @@ class EnderecosRelationManager extends RelationManager
                         \Filament\Actions\Action::make('buscar-cep')
                             ->icon('heroicon-o-magnifying-glass')
                             ->action(function ($get, $set, $state) {
+                                /**
+                                 * Busca informações do CEP informado, preenchendo automaticamente os campos de endereço.
+                                 */
                                 if (! $state) {
                                     $set('cep_ok', null);
                                     $set('cep_hint', null);
@@ -97,7 +104,7 @@ class EnderecosRelationManager extends RelationManager
                                             ];
                                         }
                                     } catch (\Throwable $e) {
-                                        // silencioso
+                                        // Falha silenciosa ao buscar CEP externo
                                     }
                                 }
 
@@ -117,6 +124,9 @@ class EnderecosRelationManager extends RelationManager
                             })
                     )
                     ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        /**
+                         * Atualiza os campos de endereço ao alterar o CEP.
+                         */
                         if (! $state) {
                             $set('cep_ok', null);
                             $set('cep_hint', null);
@@ -145,7 +155,7 @@ class EnderecosRelationManager extends RelationManager
                                     ];
                                 }
                             } catch (\Throwable $e) {
-                                // silencioso
+                                // Falha silenciosa ao buscar CEP externo
                             }
                         }
 
@@ -206,6 +216,9 @@ class EnderecosRelationManager extends RelationManager
             ->columns(12);
     }
 
+    /**
+     * Define a tabela de exibição dos endereços relacionados ao cliente.
+     */
     public function table(Table $table): Table
     {
         return $table
@@ -222,6 +235,9 @@ class EnderecosRelationManager extends RelationManager
                     ->label('CEP')
                     ->grow(false)
                     ->formatStateUsing(function ($state) {
+                        /**
+                         * Formata o CEP para exibição no padrão 99999-999.
+                         */
                         $d = preg_replace('/\D+/', '', (string) $state);
                         return strlen($d) === 8 ? substr($d, 0, 5) . '-' . substr($d, 5) : (string) $state;
                     }),
@@ -235,32 +251,34 @@ class EnderecosRelationManager extends RelationManager
                 CreateAction::make()->label('Novo endereço'),
             ])
             ->recordActions([
-    EditAction::make()->label('Editar'),
+                EditAction::make()->label('Editar'),
 
-    Action::make('tornarPadrao')
-            ->label('Definir como padrão')
-            ->icon('heroicon-o-star')
-            ->color('warning')
-            ->visible(fn (Endereco $record) => ! $record->padrao)
-            ->requiresConfirmation()
-            ->action(function (Endereco $record) {
-                // Desmarca todos os outros endereços do cliente
-                Endereco::where('empresa_id', $record->empresa_id)->update(['padrao' => false]);
+                Action::make('tornarPadrao')
+                    ->label('Definir como padrão')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (Endereco $record) => ! $record->padrao)
+                    ->requiresConfirmation()
+                    ->action(function (Endereco $record) {
+                        /**
+                         * Define o endereço selecionado como padrão e desmarca os demais.
+                         */
+                        Endereco::where('empresa_id', $record->empresa_id)->update(['padrao' => false]);
+                        $record->update(['padrao' => true]);
+                    })
+                    ->successNotificationTitle('Endereço marcado como padrão'),
 
-                // Marca este como padrão
-                $record->update(['padrao' => true]);
-            })
-            ->successNotificationTitle('Endereço marcado como padrão'),
-
-        DeleteAction::make()->label('Excluir'),
-    ])
+                DeleteAction::make()->label('Excluir'),
+            ])
             ->defaultSort('padrao', 'desc')
-            
             ->groupedBulkActions([
                 DeleteBulkAction::make()->label('Excluir selecionados'),
             ]);
     }
 
+    /**
+     * Retorna a lista de UFs brasileiras.
+     */
     private static function ufs(): array
     {
         return [
