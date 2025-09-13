@@ -7,7 +7,9 @@ return [
      * put them (manually) here.
      */
     'settings' => [
-
+        App\Settings\ConfiguracoesGerais::class,
+        App\Settings\AparenciaSettings::class,
+        App\Settings\EmailSettings::class,
     ],
 
     /*
