@@ -65,15 +65,6 @@ class PainelAppProvider extends PanelProvider
 
             // Grupos de navegação do painel App
             ->navigationGroups([
-                'Vendas',
-                'Estoque',
-                'Produção',
-                'Clientes',
-                'Financeiro',
-                'Fiscal',
-                'Entregas',
-                'Relatórios',
-                'Configurações',
             ]);
     }
 }

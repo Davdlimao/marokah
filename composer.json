@@ -12,11 +12,12 @@
         "jeffersongoncalves/filament-cep-field": "^2.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
-        "pxlrbt/filament-excel": "^3.1",
+        "pxlrbt/filament-excel": "3.0",
         "pxlrbt/filament-spotlight": "^2.0",
         "rupadana/filament-api-service": "^4.0",
         "spatie/laravel-activitylog": "^4.10",
-        "spatie/laravel-permission": "^6.21"
+        "spatie/laravel-permission": "^6.21",
+        "spatie/laravel-settings": "^3.4"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

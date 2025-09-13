@@ -17,6 +17,11 @@ use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Filament\Actions\Action;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
 
 /**
  * Gerencia o relacionamento de endereços do cliente no painel Filament.
@@ -222,6 +227,9 @@ class EnderecosRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->filters([
+                TrashedFilter::make(), // << filtro Lixeira
+            ])
             ->defaultSort('padrao', 'desc')
             ->columns([
                 TextColumn::make('rotulo')->label('Rótulo')->searchable(),
@@ -273,6 +281,17 @@ class EnderecosRelationManager extends RelationManager
             ->defaultSort('padrao', 'desc')
             ->groupedBulkActions([
                 DeleteBulkAction::make()->label('Excluir selecionados'),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 

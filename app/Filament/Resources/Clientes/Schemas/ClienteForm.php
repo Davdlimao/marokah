@@ -156,12 +156,19 @@ class ClienteForm
                     ->columns(12)
                     ->schema([
                         Forms\Components\TextInput::make('contrato')
-                            ->label('Contrato (código interno)')
-                            // Gera valor padrão sequencial
-                            ->default(fn ($record) => $record?->contrato ?? \App\Models\Cliente::nextContract())
+                            ->label('N° do contrato')
+                            // Gera valor padrão: AAAA + número sequencial
+                            ->default(function ($record) {
+                                if ($record?->contrato) {
+                                    return $record->contrato;
+                                }
+                                $year = date('Y');
+                                $seq = \App\Models\Cliente::nextContract($year);
+                                return $year . str_pad($seq, 6, '0', STR_PAD_LEFT);
+                            })
                             ->readOnly()
-                            ->mask('999999')
-                            ->helperText('Gerado automaticamente em ordem sequencial.')
+                            ->mask('999999999999')
+                            ->helperText('Gerado automaticamente.')
                             ->columnSpan(4),
 
                         Forms\Components\Select::make('status')
@@ -190,6 +197,14 @@ class ClienteForm
                             ->dehydrated(fn ($state) => filled($state))
                             ->native(false)
                             ->columnSpan(2),
+
+                        Forms\Components\Select::make('plano_id')
+                            ->label('Plano')
+                            ->relationship('plano', 'nome')   // usa o relacionamento
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->columnSpan(4),
 
                         Forms\Components\TextInput::make('dia_vencimento')
                             ->label('Dia de vencimento')

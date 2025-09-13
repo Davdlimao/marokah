@@ -1,0 +1,4888 @@
+﻿
+=== C:\Users\limao\marokah\app\Enums\InvoiceStatus.php ===
+<?php
+
+namespace App\Enums;
+
+enum InvoiceStatus: string
+{
+    case ABERTA = 'ABERTA';
+    case PAGA = 'PAGA';
+    case ATRASADA = 'ATRASADA';
+    case CANCELADA = 'CANCELADA';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::ABERTA => 'Aberta',
+            self::PAGA => 'Paga',
+            self::ATRASADA => 'Atrasada',
+            self::CANCELADA => 'Cancelada',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::ABERTA => 'info',
+            self::PAGA => 'success',
+            self::ATRASADA => 'danger',
+            self::CANCELADA => 'gray',
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Enums\PaymentMethod.php ===
+<?php
+
+namespace App\Enums;
+
+enum PaymentMethod: string
+{
+    case PIX = 'PIX';
+    case BOLETO = 'BOLETO';
+    case CARTAO = 'CARTAO';
+    case TRANSF = 'TRANSF';
+    case DINHEIRO = 'DINHEIRO';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PIX => 'PIX',
+            self::BOLETO => 'Boleto',
+            self::CARTAO => 'CartÃ£o',
+            self::TRANSF => 'TransferÃªncia',
+            self::DINHEIRO => 'Dinheiro',
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Enums\PaymentStatus.php ===
+<?php
+
+namespace App\Enums;
+
+enum PaymentStatus: string
+{
+    case PENDENTE = 'PENDENTE';
+    case CONFIRMADO = 'CONFIRMADO';
+    case FALHOU = 'FALHOU';
+    case ESTORNADO = 'ESTORNADO';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::PENDENTE => 'Pendente',
+            self::CONFIRMADO => 'Confirmado',
+            self::FALHOU => 'Falhou',
+            self::ESTORNADO => 'Estornado',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::PENDENTE => 'warning',
+            self::CONFIRMADO => 'success',
+            self::FALHOU => 'danger',
+            self::ESTORNADO => 'gray',
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Enums\PlanPeriod.php ===
+<?php
+
+namespace App\Enums;
+
+enum PlanPeriod: string {
+    case MENSAL='MENSAL'; case TRIMESTRAL='TRIMESTRAL'; case SEMESTRAL='SEMESTRAL'; case ANUAL='ANUAL';
+    public function label(): string { return match($this){ self::MENSAL=>'Mensal', self::TRIMESTRAL=>'Trimestral', self::SEMESTRAL=>'Semestral', self::ANUAL=>'Anual' }; }
+    public function color(): string { return match($this){ self::MENSAL=>'primary', self::TRIMESTRAL=>'info', self::SEMESTRAL=>'warning', self::ANUAL=>'success' }; }
+}
+
+=== C:\Users\limao\marokah\app\Enums\PlanStatus.php ===
+<?php
+
+namespace App\Enums;
+
+enum PlanStatus: string
+{
+    case ATIVO = 'ATIVO';
+    case INATIVO = 'INATIVO';
+
+    public function label(): string
+    {
+        return $this === self::ATIVO ? 'ATIVO' : 'INATIVO';
+    }
+
+    public function color(): string
+    {
+        return $this === self::ATIVO ? 'success' : 'danger';
+    }
+
+    /** Converte qualquer entrada (bool/num/string/enum) para PlanStatus */
+    public static function coerce(mixed $v): self
+    {
+        if ($v instanceof self) return $v;
+
+        // normaliza strings
+        if (is_string($v)) {
+            $s = mb_strtoupper(trim($v));
+            return $s === 'ATIVO' ? self::ATIVO : self::INATIVO;
+        }
+
+        // bool / num
+        if (is_bool($v)) return $v ? self::ATIVO : self::INATIVO;
+        if (is_numeric($v)) return ((int) $v) === 1 ? self::ATIVO : self::INATIVO;
+
+        return self::INATIVO;
+    }
+}
+
+=== C:\Users\limao\marokah\app\Enums\SubscriptionStatus.php ===
+<?php
+
+namespace App\Enums;
+
+enum SubscriptionStatus: string
+{
+    case ATIVA = 'ATIVA';
+    case PAUSADA = 'PAUSADA';
+    case INADIMPLENTE = 'INADIMPLENTE';
+    case CANCELADA = 'CANCELADA';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::ATIVA => 'Ativa',
+            self::PAUSADA => 'Pausada',
+            self::INADIMPLENTE => 'Inadimplente',
+            self::CANCELADA => 'Cancelada',
+        };
+    }
+
+    public function color(): string
+    {
+        return match ($this) {
+            self::ATIVA => 'success',
+            self::PAUSADA => 'warning',
+            self::INADIMPLENTE => 'danger',
+            self::CANCELADA => 'gray',
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Exports\ClienteAdvancedExport.php ===
+
+=== C:\Users\limao\marokah\app\Filament\Clusters\Configuracoes\Pages\IntegracaoEmail.php ===
+<?php
+
+namespace App\Filament\Clusters\Configuracoes\Pages;
+
+use App\Filament\Clusters\Configuracoes\ConfiguracoesCluster;
+use App\Models\ConfiguracaoEmail;
+use Filament\Actions;
+use Filament\Forms\Components\{Select, Textarea, TextInput, Toggle};
+use Filament\Schemas\Components\Section;
+use Filament\Forms\Form;
+use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Mail;
+
+class IntegracaoEmail extends Page
+{
+
+    /** vincula a pÃ¡gina ao cluster pela CLASSE */
+    protected static ?string $cluster = ConfiguracoesCluster::class;
+
+    protected static ?string $navigationLabel = 'IntegraÃ§Ã£o Email';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-envelope';
+    protected static ?string $title = 'IntegraÃ§Ã£o com E-mail';
+
+
+    /** state do formulÃ¡rio (por causa do ->statePath('data')) */
+    public ?array $data = [];
+
+    /** config atual */
+    public ConfiguracaoEmail $cfg;
+
+    public function mount(): void
+    {
+        $this->cfg = ConfiguracaoEmail::unico();
+        // O Filament gerencia o preenchimento do formulÃ¡rio automaticamente
+    }
+
+    /** registra os forms desta pÃ¡gina */
+
+    /** schema do formulÃ¡rio */
+    public function getFormSchema(): array
+    {
+        return [
+            Section::make('Servidor SMTP')
+                ->columns(12)
+                ->schema([
+                    Toggle::make('ativo')
+                        ->label('Ativo')
+                        ->default(true)
+                        ->helperText('Se desativado, o sistema nÃ£o tentarÃ¡ enviar e-mails.')
+                        ->columnSpan(3),
+                    Select::make('driver')
+                        ->label('Driver')
+                        ->options(['smtp' => 'SMTP'])
+                        ->native(false)
+                        ->required()
+                        ->columnSpan(3),
+                    TextInput::make('host')
+                        ->label('Host')
+                        ->placeholder('smtp.seudominio.com')
+                        ->required()
+                        ->columnSpan(4),
+                    TextInput::make('porta')
+                        ->label('Porta')
+                        ->numeric()
+                        ->default(587)
+                        ->required()
+                        ->columnSpan(2),
+                    Select::make('criptografia')
+                        ->label('Criptografia')
+                        ->options(['tls' => 'TLS', 'ssl' => 'SSL', null => 'Nenhuma'])
+                        ->native(false)
+                        ->columnSpan(3),
+                    TextInput::make('usuario')
+                        ->label('UsuÃ¡rio')
+                        ->columnSpan(4),
+                    TextInput::make('senha')
+                        ->label('Senha')
+                        ->password()
+                        ->revealable()
+                        ->columnSpan(5),
+                ]),
+            Section::make('Remetente padrÃ£o')
+                ->columns(12)
+                ->schema([
+                    TextInput::make('from_nome')
+                        ->label('Nome do remetente')
+                        ->required()
+                        ->columnSpan(6),
+                    TextInput::make('from_email')
+                        ->label('E-mail do remetente')
+                        ->email()
+                        ->required()
+                        ->columnSpan(6),
+                ]),
+            Section::make('Modo de desenvolvimento')
+                ->columns(12)
+                ->schema([
+                    Toggle::make('dev_modo')
+                        ->label('Redirecionar todos os e-mails')
+                        ->helperText('Quando ativo, todos os e-mails enviados serÃ£o redirecionados para o endereÃ§o abaixo.')
+                        ->columnSpan(4),
+                    TextInput::make('dev_redirecionar_para')
+                        ->label('Enviar tudo para')
+                        ->email()
+                        ->visible(fn (callable $get) => (bool) $get('dev_modo'))
+                        ->placeholder('seu-email-de-teste@exemplo.com')
+                        ->columnSpan(8),
+                ]),
+        ];
+    }
+
+    protected function getFormActions(): array
+    {
+        return [
+            Actions\Action::make('salvar')
+                ->label('Guardar')
+                ->submit('salvar')
+                ->color('success')
+                ->icon('heroicon-o-check'),
+
+            Actions\Action::make('testar')
+                ->label('Testar envio')
+                ->icon('heroicon-o-paper-airplane')
+                ->color('info')
+                ->form([
+                    TextInput::make('para')->label('Enviar para')->email()->required(),
+                    TextInput::make('assunto')->label('Assunto')->default('Teste de e-mail - Marokah'),
+                    Textarea::make('mensagem')->label('Mensagem')->default('OlÃ¡! Este Ã© um e-mail de teste da Marokah.'),
+                ])
+                ->action(function (array $dados) {
+                        $this->aplicarNasConfigs($this->data);
+
+                    try {
+                        Mail::raw($dados['mensagem'] ?? 'Teste', function ($m) use ($dados) {
+                            $m->to($dados['para'])->subject($dados['assunto'] ?? 'Teste');
+                        });
+
+                        Notification::make()->title('E-mail enviado com sucesso.')->success()->send();
+                    } catch (\Throwable $e) {
+                        Notification::make()
+                            ->title('Falha ao enviar e-mail')
+                            ->body($e->getMessage())
+                            ->danger()
+                            ->send();
+                    }
+                }),
+        ];
+    }
+
+    public function salvar(): void
+    {
+        $dados = $this->data;
+
+        $this->cfg->fill($dados)->save();
+        $this->aplicarNasConfigs($dados);
+
+        Notification::make()->title('ConfiguraÃ§Ãµes de e-mail salvas.')->success()->send();
+    }
+
+    private function aplicarNasConfigs(array $dados): void
+    {
+        if (empty($dados['ativo'])) {
+            return;
+        }
+
+        Config::set('mail.default', 'smtp');
+        Config::set('mail.from.address', $dados['from_email'] ?? null);
+        Config::set('mail.from.name', $dados['from_nome'] ?? null);
+
+        Config::set('mail.mailers.smtp.host', $dados['host'] ?? null);
+        Config::set('mail.mailers.smtp.port', (int) ($dados['porta'] ?? 587));
+        Config::set('mail.mailers.smtp.encryption', $dados['criptografia'] ?? null);
+        Config::set('mail.mailers.smtp.username', $dados['usuario'] ?? null);
+        Config::set('mail.mailers.smtp.password', $dados['senha'] ?? null);
+
+        if (!empty($dados['dev_modo']) && !empty($dados['dev_redirecionar_para'])) {
+            Mail::alwaysTo($dados['dev_redirecionar_para']);
+        }
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Clusters\Configuracoes\ConfiguracoesCluster.php ===
+<?php
+
+namespace App\Filament\Clusters\Configuracoes;
+
+use BackedEnum;
+use Filament\Clusters\Cluster;
+use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Auth;
+
+class ConfiguracoesCluster extends Cluster
+{
+    protected static ?string $navigationLabel = 'ConfiguraÃ§Ãµes';
+    protected static string|BackedEnum|null $navigationIcon  = 'heroicon-o-cog-6-tooth';
+    protected static ?int    $navigationSort  = 900;
+
+    // opcional: restringe a superadmin (ajuste para sua regra)
+    public static function shouldRegisterNavigation(): bool
+    {
+        $u = Auth::user();
+        return (bool) $u?->is_superadmin; // ajuste para seu atributo/regra
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\Pages\CreateAssinatura.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas\Pages;
+
+use App\Filament\Resources\Assinaturas\AssinaturaResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateAssinatura extends CreateRecord
+{
+    protected static string $resource = AssinaturaResource::class;
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\Pages\EditAssinatura.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas\Pages;
+
+use App\Filament\Resources\Assinaturas\AssinaturaResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditAssinatura extends EditRecord
+{
+    protected static string $resource = AssinaturaResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\Pages\ListAssinaturas.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas\Pages;
+
+use App\Filament\Resources\Assinaturas\AssinaturaResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+
+class ListAssinaturas extends ListRecords
+{
+    protected static string $resource = AssinaturaResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\Schemas\AssinaturaForm.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas\Schemas;
+
+use App\Models\Plano;
+use Filament\Forms;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class AssinaturaForm
+{
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Dados da assinatura')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\Select::make('empresa_id')
+                            ->label('Cliente')
+                            ->relationship('empresa', 'nome')
+                            ->searchable()->preload()
+                            ->required()
+                            ->dehydrated(true)
+                            ->afterStateUpdated(function ($set, $state) {
+                                // se o cliente tem dia padrÃ£o, use; senÃ£o, mantenha como estÃ¡
+                                $dia = \App\Models\Cliente::find($state)?->dia_vencimento;
+                                if ($dia) $set('dia_vencimento', (int) $dia);
+                            })
+                            ->columnSpan(6),
+
+                        Forms\Components\Select::make('plano_id')
+                            ->label('Plano')
+                            ->options(Plano::query()->orderBy('nome')->pluck('nome', 'id'))
+                            ->searchable()->preload()
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $state) {
+                                $plano = Plano::find($state);
+                                if ($plano) {
+                                    $set('valor', $plano->valor);
+                                    $set('periodicidade', $plano->periodicidade instanceof \BackedEnum ? $plano->periodicidade->value : strtoupper((string)$plano->periodicidade));
+                                }
+                            })
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('valor')
+                            ->label('Valor da assinatura')
+                            ->numeric()->prefix('R$')->step('0.01')
+                            ->helperText('Se vazio, usa o valor do plano.')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('periodicidade')
+                            ->label('Periodicidade')
+                            ->disabled()->dehydrated(true)
+                            ->columnSpan(3),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Status da assinatura')
+                            ->native(false)
+                            ->options([
+                                'ATIVA' => 'Ativa',
+                                'PAUSADA' => 'Pausada',
+                                'INADIMPLENTE' => 'Inadimplente',
+                                'CANCELADA' => 'Cancelada',
+                            ])
+                            ->default('ATIVA')
+                            ->columnSpan(3),
+
+                        Forms\Components\DatePicker::make('started_at')
+                            ->label('InÃ­cio de uso')
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $state, $get) {
+                                // se nÃ£o houver dia definido, usa o dia do started_at
+                                if (! $get('dia_vencimento') && $state) {
+                                    $set('dia_vencimento', \Carbon\Carbon::parse($state)->day);
+                                }
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\DatePicker::make('trial_ends_at')
+                            ->label('Trial atÃ©')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('dia_vencimento')
+                            ->label('Dia de vencimento mensal')
+                            ->numeric()->minValue(1)->maxValue(31)
+                            ->helperText('Usado para gerar as cobranÃ§as recorrentes.')
+                            ->columnSpan(3),
+                    ]),
+
+                Section::make('ObservaÃ§Ãµes')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\Textarea::make('obs')
+                            ->label('ObservaÃ§Ãµes')
+                            ->rows(3)
+                            ->columnSpan(12),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\Tables\AssinaturasTable.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas\Tables;
+
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+
+class AssinaturasTable
+{
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->defaultSort('id', 'desc')
+            ->columns([
+                Tables\Columns\TextColumn::make('empresa.nome')
+                    ->label('Cliente')
+                    ->searchable()
+                    ->formatStateUsing(fn ($value, $record) => $record->empresa?->nome ?? '-')
+                ,
+                Tables\Columns\TextColumn::make('plano.nome')
+                    ->label('Plano')
+                    ->searchable()
+                    ->formatStateUsing(fn ($value, $record) => $record->plano?->nome ?? '-')
+                ,
+                Tables\Columns\TextColumn::make('valor')
+                    ->label('Valor')
+                    ->money('BRL', true),
+                Tables\Columns\TextColumn::make('periodicidade')
+                    ->label('Per.'),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn ($value, $record) => $record && $record->status && method_exists($record->status, 'label') ? $record->status->label() : ((string) ($record->status ?? '-')))
+                    ->color(fn ($record) => $record && $record->status && method_exists($record->status, 'color') ? $record->status->color() : 'gray'),
+                Tables\Columns\TextColumn::make('proximo_vencimento')
+                    ->label('PrÃ³x. vencimento')
+                    ->state(fn ($record) => $record->proximo_vencimento)
+                    ->date('d/m/Y'),
+            ])
+            ->actions([
+                EditAction::make()->label('Editar'),
+            ])
+            ->bulkActions([
+                DeleteBulkAction::make(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Assinaturas\AssinaturaResource.php ===
+<?php
+
+namespace App\Filament\Resources\Assinaturas;
+
+use App\Filament\Resources\Assinaturas\Pages\CreateAssinatura;
+use App\Filament\Resources\Assinaturas\Pages\EditAssinatura;
+use App\Filament\Resources\Assinaturas\Pages\ListAssinaturas;
+use App\Filament\Resources\Assinaturas\Schemas\AssinaturaForm;
+use App\Filament\Resources\Assinaturas\Tables\AssinaturasTable;
+use App\Models\Assinatura;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class AssinaturaResource extends Resource
+{
+    protected static ?string $model = Assinatura::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentCheck;
+
+    // ðŸ‘‡ agrupa no menu Faturamento e define a ordem
+    protected static string|\UnitEnum|null $navigationGroup = 'Faturamento';
+    protected static ?string $navigationLabel = 'Assinaturas';
+    protected static ?int $navigationSort = 20;
+
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function form(Schema $schema): Schema
+    {
+        return AssinaturaForm::make($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return AssinaturasTable::make($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListAssinaturas::route('/'),
+            'create' => CreateAssinatura::route('/create'),
+            'edit' => EditAssinatura::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\Pages\CreateCliente.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\Pages;
+
+use App\Filament\Resources\Clientes\ClienteResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateCliente extends CreateRecord
+{
+    protected static string $resource = ClienteResource::class;
+
+    /** Chamado depois que o registro foi criado com sucesso */
+    protected function afterCreate(): void
+    {
+        $this->redirect(
+            static::getResource()::getUrl('edit', ['record' => $this->getRecord()])
+        );
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\Pages\EditCliente.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\Pages;
+
+use App\Filament\Resources\Clientes\ClienteResource;
+use Filament\Actions\DeleteAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditCliente extends EditRecord
+{
+    protected static string $resource = ClienteResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\Pages\ListClientes.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\Pages;
+
+use App\Filament\Resources\Clientes\ClienteResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+
+class ListClientes extends ListRecords
+{
+    protected static string $resource = ClienteResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\RelationManagers\ContabilidadeRelationManager.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\RelationManagers;
+
+use App\Support\BrDocuments;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Closure;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
+
+/**
+ * RelationManager responsÃ¡vel por gerenciar as contabilidades relacionadas ao cliente.
+ */
+class ContabilidadeRelationManager extends RelationManager
+{
+    protected static string $relationship = 'contabilidades';
+    protected static ?string $title = 'Contabilidade';
+
+    /**
+     * Define o formulÃ¡rio de criaÃ§Ã£o/ediÃ§Ã£o de contabilidade.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
+    public function form(Schema $schema): Schema
+    {
+        return $schema->components([
+            TextInput::make('razao_social')
+                ->label('Nome do escritÃ³rio')
+                ->maxLength(255)
+                ->columnSpan(6),
+
+            Hidden::make('cnpj_ok')->dehydrated(false)->reactive(),
+            Hidden::make('cnpj_hint')->dehydrated(false)->reactive(),
+            Hidden::make('email_ok')->dehydrated(false)->reactive(),
+            Hidden::make('email_hint')->dehydrated(false)->reactive(),
+            Hidden::make('tel_ok')->dehydrated(false)->reactive(),
+            Hidden::make('tel_hint')->dehydrated(false)->reactive(),
+
+            TextInput::make('cnpj')
+                ->label('CNPJ')
+                ->mask('99.999.999/9999-99')
+                ->live(onBlur: true)
+                ->rules(fn (): array => [
+                    function (string $attribute, $value, \Closure $fail) {
+                        $d = preg_replace('/\D+/', '', (string) $value);
+                        if ($d && ! \App\Support\BrDocuments::cnpj($d)) {
+                            $fail('CNPJ invÃ¡lido.');
+                        }
+                    },
+                ])
+                ->suffixIcon(fn ($get) => match ($get('cnpj_ok')) {
+                    true => 'heroicon-m-check-circle',
+                    false => 'heroicon-m-x-circle',
+                    default => null,
+                })
+                ->suffixIconColor(fn ($get) => $get('cnpj_ok') ? 'success' : 'danger')
+                ->hint(fn ($get) => $get('cnpj_hint'))
+                ->hintColor(fn ($get) => $get('cnpj_ok') ? 'success' : 'danger')
+                ->afterStateUpdated(function ($set, $get, ?string $state) {
+                    $d = preg_replace('/\D+/', '', (string) $state);
+                    if (!$d) { $set('cnpj_ok', null); $set('cnpj_hint', null); return; }
+                    $ok = \App\Support\BrDocuments::cnpj($d);
+                    $set('cnpj_ok', $ok);
+                    $set('cnpj_hint', $ok ? 'CNPJ vÃ¡lido.' : 'CNPJ invÃ¡lido.');
+                })
+                ->columnSpan(4),
+
+            TextInput::make('nome_contato')
+                ->label('Nome do contador responsÃ¡vel')
+                ->required()
+                ->maxLength(255)
+                ->columnSpan(6),
+
+            TextInput::make('email')
+                ->label('E-mail')->email()->required()
+                ->live(onBlur: true)
+                ->suffixIcon(fn ($get) => match ($get('email_ok')) {
+                    true => 'heroicon-m-check-circle',
+                    false => 'heroicon-m-x-circle',
+                    default => null,
+                })
+                ->suffixIconColor(fn ($get) => $get('email_ok') ? 'success' : 'danger')
+                ->hint(fn ($get) => $get('email_hint'))
+                ->hintColor(fn ($get) => $get('email_ok') ? 'success' : 'danger')
+                ->afterStateUpdated(function ($set, $get, ?string $state) {
+                    if ($state === null || $state === '') { $set('email_ok', null); $set('email_hint', null); return; }
+                    $ok = filter_var($state, FILTER_VALIDATE_EMAIL) !== false;
+                    $set('email_ok', $ok);
+                    $set('email_hint', $ok ? 'E-mail vÃ¡lido.' : 'E-mail invÃ¡lido.');
+                })
+                ->columnSpan(5),
+
+            TextInput::make('telefone')
+                ->label('Telefone')
+                ->mask('(99) 99999-9999')
+                ->live(onBlur: true)
+                ->rules(['nullable', 'regex:/^\D*\d{2}\D*\d{4,5}\D*\d{4}\D*$/'])
+                ->suffixIcon(fn ($get) => match ($get('tel_ok')) {
+                    true => 'heroicon-m-check-circle',
+                    false => 'heroicon-m-x-circle',
+                    default => null,
+                })
+                ->suffixIconColor(fn ($get) => $get('tel_ok') ? 'success' : 'danger')
+                ->hint(fn ($get) => $get('tel_hint'))
+                ->hintColor(fn ($get) => $get('tel_ok') ? 'success' : 'danger')
+                ->afterStateUpdated(function ($set, $get, ?string $state) {
+                    if (!$state) { $set('tel_ok', null); $set('tel_hint', null); return; }
+                    $d = preg_replace('/\D+/', '', (string) $state);
+                    $ok = preg_match('/^\d{10,11}$/', $d) === 1;
+                    $set('tel_ok', $ok);
+                    $set('tel_hint', $ok ? 'Telefone vÃ¡lido.' : 'Telefone invÃ¡lido.');
+                })
+                ->columnSpan(3),
+
+            Toggle::make('principal')->label('Principal?')->inline(false)->columnSpan(3),
+
+            Textarea::make('observacoes')->label('ObservaÃ§Ãµes')->rows(3)->columnSpan(12),
+        ])->columns(12);
+    }
+
+    /**
+     * Define a tabela de listagem das contabilidades.
+     *
+     * @param Table $table
+     * @return Table
+     */
+    public function table(Table $table): Table
+    {
+        return $table
+            ->filters([
+                    TrashedFilter::make(), // << filtro Lixeira
+                ])
+            ->defaultSort('principal', 'desc')
+            ->columns([
+                TextColumn::make('nome_contato')->label('Nome do responsÃ¡vel')->searchable()->sortable(),
+                TextColumn::make('email')->label('E-mail')->copyable()->toggleable(),
+                TextColumn::make('telefone')
+                    ->label('Telefone')
+                    ->formatStateUsing(function ($state) {
+                        $d = preg_replace('/\D+/', '', (string) $state);
+                        if ($d === '') return 'â€”';
+                        return strlen($d) === 11
+                            ? preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $d)
+                            : (strlen($d) === 10 ? preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $d) : 'â€”');
+                    }),
+                TextColumn::make('razao_social')->label('Nome do escritÃ³rio')->toggleable(),
+                TextColumn::make('principal_label')
+                    ->label('Principal')
+                    ->state(fn ($record) => $record->principal ? 'Principal' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn ($record) => $record->principal ? 'success' : 'warning'),
+            ])
+            ->headerActions([
+                CreateAction::make()->label('Nova contabilidade'),
+            ])
+            ->recordActions([
+                EditAction::make()->label('Editar'),
+                /**
+                 * AÃ§Ã£o para definir a contabilidade como principal.
+                 * Atualiza todas as outras como nÃ£o principal e marca a selecionada.
+                 */
+                Action::make('tornarPrincipal')
+                    ->label('Definir como principal')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (\App\Models\Contabilidade $record) => ! $record->principal)
+                    ->requiresConfirmation()
+                    ->action(function (\App\Models\Contabilidade $record) {
+                        \App\Models\Contabilidade::where('empresa_id', $record->empresa_id)->update(['principal' => false]);
+                        $record->update(['principal' => true]);
+                    })
+                    ->successNotificationTitle('Contabilidade marcada como principal'),
+                DeleteAction::make()->label('Excluir'),
+            ])
+            ->groupedBulkActions([
+                DeleteBulkAction::make(),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\RelationManagers\EnderecosRelationManager.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\RelationManagers;
+
+use App\Models\Endereco;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Filament\Actions\Action;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
+
+/**
+ * Gerencia o relacionamento de endereÃ§os do cliente no painel Filament.
+ */
+class EnderecosRelationManager extends RelationManager
+{
+    protected static string $relationship = 'enderecos';
+    protected static ?string $recordTitleAttribute = 'rua';
+    protected static ?string $title = 'EndereÃ§os';
+
+    /**
+     * Define o formulÃ¡rio para criaÃ§Ã£o/ediÃ§Ã£o de endereÃ§os.
+     */
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Select::make('tipo')
+                    ->label('Tipo')
+                    ->options([
+                        'principal' => 'Principal',
+                        'cobranca'  => 'CobranÃ§a',
+                        'entrega'   => 'Entrega',
+                        'outro'     => 'Outro',
+                    ])
+                    ->native(false)
+                    ->default('principal')
+                    ->columnSpan(3),
+
+                TextInput::make('rotulo')
+                    ->label('RÃ³tulo (ex.: Matriz, Filial 2)')
+                    ->maxLength(60)
+                    ->columnSpan(5),
+
+                Hidden::make('cep_ok')->dehydrated(false)->reactive(),
+                Hidden::make('cep_hint')->dehydrated(false)->reactive(),
+
+                TextInput::make('cep')
+                    ->label('CEP')
+                    ->mask('99999-999')
+                    ->stripCharacters(['-'])
+                    ->live(onBlur: true)
+                    ->required()
+                    ->rule('regex:/^\d{5}-?\d{3}$/')
+                    ->suffixIcon(fn ($get) => match ($get('cep_ok')) {
+                        true  => 'heroicon-m-check-circle',
+                        false => 'heroicon-m-x-circle',
+                        default => null,
+                    })
+                    ->suffixIconColor(fn ($get) => $get('cep_ok') ? 'success' : 'danger')
+                    ->hint(fn ($get) => $get('cep_hint'))
+                    ->hintColor(fn ($get) => $get('cep_ok') ? 'success' : 'danger')
+                    ->suffixAction(
+                        \Filament\Actions\Action::make('buscar-cep')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->action(function ($get, $set, $state) {
+                                /**
+                                 * Busca informaÃ§Ãµes do CEP informado, preenchendo automaticamente os campos de endereÃ§o.
+                                 */
+                                if (! $state) {
+                                    $set('cep_ok', null);
+                                    $set('cep_hint', null);
+                                    return;
+                                }
+
+                                $cep = preg_replace('/\D+/', '', $state);
+                                if (strlen($cep) !== 8) {
+                                    $set('cep_ok', false);
+                                    $set('cep_hint', 'CEP invÃ¡lido.');
+                                    return;
+                                }
+
+                                $row = DB::table('cep')->where('cep', $cep)->first();
+
+                                if (! $row) {
+                                    try {
+                                        $res = Http::acceptJson()->timeout(6)->get("https://brasilapi.com.br/api/cep/v2/{$cep}");
+                                        if ($res->successful()) {
+                                            $data = $res->json();
+                                            $row = (object) [
+                                                'street'       => $data['street']       ?? ($data['logradouro'] ?? null),
+                                                'neighborhood' => $data['neighborhood'] ?? ($data['bairro'] ?? null),
+                                                'city'         => $data['city']         ?? null,
+                                                'state'        => $data['state']        ?? null,
+                                            ];
+                                        }
+                                    } catch (\Throwable $e) {
+                                        // Falha silenciosa ao buscar CEP externo
+                                    }
+                                }
+
+                                if (! $row) {
+                                    $set('cep_ok', false);
+                                    $set('cep_hint', 'CEP nÃ£o encontrado.');
+                                    return;
+                                }
+
+                                $set('cep_ok', true);
+                                $set('cep_hint', 'CEP encontrado.');
+
+                                if (! $get('rua')    && ! empty($row->street))       $set('rua',    $row->street);
+                                if (! $get('bairro') && ! empty($row->neighborhood)) $set('bairro', $row->neighborhood);
+                                if (! $get('cidade') && ! empty($row->city))         $set('cidade', $row->city);
+                                if (! $get('uf')     && ! empty($row->state))        $set('uf',     $row->state);
+                            })
+                    )
+                    ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        /**
+                         * Atualiza os campos de endereÃ§o ao alterar o CEP.
+                         */
+                        if (! $state) {
+                            $set('cep_ok', null);
+                            $set('cep_hint', null);
+                            return;
+                        }
+
+                        $cep = preg_replace('/\D+/', '', $state);
+                        if (strlen($cep) !== 8) {
+                            $set('cep_ok', false);
+                            $set('cep_hint', 'CEP invÃ¡lido.');
+                            return;
+                        }
+
+                        $row = DB::table('cep')->where('cep', $cep)->first();
+
+                        if (! $row) {
+                            try {
+                                $res = Http::acceptJson()->timeout(6)->get("https://brasilapi.com.br/api/cep/v2/{$cep}");
+                                if ($res->successful()) {
+                                    $data = $res->json();
+                                    $row = (object) [
+                                        'street'       => $data['street']       ?? ($data['logradouro'] ?? null),
+                                        'neighborhood' => $data['neighborhood'] ?? ($data['bairro'] ?? null),
+                                        'city'         => $data['city']         ?? null,
+                                        'state'        => $data['state']        ?? null,
+                                    ];
+                                }
+                            } catch (\Throwable $e) {
+                                // Falha silenciosa ao buscar CEP externo
+                            }
+                        }
+
+                        if (! $row) {
+                            $set('cep_ok', false);
+                            $set('cep_hint', 'CEP nÃ£o encontrado.');
+                            return;
+                        }
+
+                        $set('cep_ok', true);
+                        $set('cep_hint', 'CEP encontrado.');
+
+                        if (! $get('rua')    && ! empty($row->street))       $set('rua',    $row->street);
+                        if (! $get('bairro') && ! empty($row->neighborhood)) $set('bairro', $row->neighborhood);
+                        if (! $get('cidade') && ! empty($row->city))         $set('cidade', $row->city);
+                        if (! $get('uf')     && ! empty($row->state))        $set('uf',     $row->state);
+                    })
+                    ->columnSpan(3),
+
+                TextInput::make('rua')
+                    ->label('Rua / Logradouro')
+                    ->columnSpan(9),
+
+                TextInput::make('numero')
+                    ->label('NÃºmero')
+                    ->maxLength(30)
+                    ->columnSpan(2),
+
+                TextInput::make('complemento')
+                    ->label('Complemento')
+                    ->columnSpan(4),
+
+                TextInput::make('referencia')
+                    ->label('ReferÃªncia')
+                    ->columnSpan(4),
+
+                TextInput::make('bairro')
+                    ->label('Bairro')
+                    ->columnSpan(4),
+
+                TextInput::make('cidade')
+                    ->label('Cidade')
+                    ->columnSpan(5),
+
+                Select::make('uf')
+                    ->label('UF')
+                    ->options(self::ufs())
+                    ->native(false)
+                    ->columnSpan(3),
+
+                Select::make('padrao')
+                    ->label('EndereÃ§o padrÃ£o?')
+                    ->options([0 => 'NÃ£o', 1 => 'Sim'])
+                    ->native(false)
+                    ->default(0)
+                    ->columnSpan(3),
+            ])
+            ->columns(12);
+    }
+
+    /**
+     * Define a tabela de exibiÃ§Ã£o dos endereÃ§os relacionados ao cliente.
+     */
+    public function table(Table $table): Table
+    {
+        return $table
+            ->filters([
+                TrashedFilter::make(), // << filtro Lixeira
+            ])
+            ->defaultSort('padrao', 'desc')
+            ->columns([
+                TextColumn::make('rotulo')->label('RÃ³tulo')->searchable(),
+                TextColumn::make('tipo')->label('Tipo')->badge(),
+                TextColumn::make('rua')->label('Rua')->limit(30)->searchable(),
+                TextColumn::make('numero')->label('NÂº')->grow(false),
+                TextColumn::make('bairro')->label('Bairro')->searchable(),
+                TextColumn::make('cidade')->label('Cidade')->searchable(),
+                TextColumn::make('uf')->label('UF')->grow(false),
+                TextColumn::make('cep')
+                    ->label('CEP')
+                    ->grow(false)
+                    ->formatStateUsing(function ($state) {
+                        /**
+                         * Formata o CEP para exibiÃ§Ã£o no padrÃ£o 99999-999.
+                         */
+                        $d = preg_replace('/\D+/', '', (string) $state);
+                        return strlen($d) === 8 ? substr($d, 0, 5) . '-' . substr($d, 5) : (string) $state;
+                    }),
+                TextColumn::make('padrao')
+                    ->label('PadrÃ£o')
+                    ->state(fn ($record) => $record->padrao ? 'PadrÃ£o' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn ($state) => $state === 'PadrÃ£o' ? 'success' : 'warning')
+            ])
+            ->headerActions([
+                CreateAction::make()->label('Novo endereÃ§o'),
+            ])
+            ->recordActions([
+                EditAction::make()->label('Editar'),
+
+                Action::make('tornarPadrao')
+                    ->label('Definir como padrÃ£o')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (Endereco $record) => ! $record->padrao)
+                    ->requiresConfirmation()
+                    ->action(function (Endereco $record) {
+                        /**
+                         * Define o endereÃ§o selecionado como padrÃ£o e desmarca os demais.
+                         */
+                        Endereco::where('empresa_id', $record->empresa_id)->update(['padrao' => false]);
+                        $record->update(['padrao' => true]);
+                    })
+                    ->successNotificationTitle('EndereÃ§o marcado como padrÃ£o'),
+
+                DeleteAction::make()->label('Excluir'),
+            ])
+            ->defaultSort('padrao', 'desc')
+            ->groupedBulkActions([
+                DeleteBulkAction::make()->label('Excluir selecionados'),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
+            ]);
+    }
+
+    /**
+     * Retorna a lista de UFs brasileiras.
+     */
+    private static function ufs(): array
+    {
+        return [
+            'AC'=>'AC','AL'=>'AL','AP'=>'AP','AM'=>'AM','BA'=>'BA','CE'=>'CE','DF'=>'DF','ES'=>'ES',
+            'GO'=>'GO','MA'=>'MA','MT'=>'MT','MS'=>'MS','MG'=>'MG','PA'=>'PA','PB'=>'PB','PR'=>'PR',
+            'PE'=>'PE','PI'=>'PI','RJ'=>'RJ','RN'=>'RN','RS'=>'RS','RO'=>'RO','RR'=>'RR','SC'=>'SC',
+            'SP'=>'SP','SE'=>'SE','TO'=>'TO',
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\RelationManagers\PessoasRelationManager.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\RelationManagers;
+
+use App\Support\BrDocuments;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Forms;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
+
+/**
+ * Gerencia a relaÃ§Ã£o de pessoas vinculadas ao cliente/empresa.
+ */
+class PessoasRelationManager extends RelationManager
+{
+    protected static string $relationship = 'pessoas';
+    protected static ?string $title = 'Pessoas';
+
+    /**
+     * Define o formulÃ¡rio de cadastro/ediÃ§Ã£o de pessoas.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Select::make('tipo')
+                    ->label('Tipo de contato')
+                    ->options([
+                        'representante' => 'Representante',
+                        'financeiro'    => 'Financeiro',
+                        'compras'       => 'Compras',
+                        'fiscal'        => 'Fiscal',
+                        'comercial'     => 'Comercial',
+                        'suporte'       => 'Suporte',
+                        'ti'            => 'TI',
+                        'outro'         => 'Outro',
+                    ])
+                    ->required()
+                    ->native(false)
+                    ->columnSpan(5),
+
+                TextInput::make('nome')
+                    ->label('Nome completo')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(5),
+
+                TextInput::make('cargo')
+                    ->label('Cargo')
+                    ->maxLength(255)
+                    ->columnSpan(3),
+
+                Hidden::make('cpf_ok')->dehydrated(false)->reactive(),
+                Hidden::make('cpf_hint')->dehydrated(false)->reactive(),
+                Hidden::make('email_ok')->dehydrated(false)->reactive(),
+                Hidden::make('email_hint')->dehydrated(false)->reactive(),
+                Hidden::make('tel_ok')->dehydrated(false)->reactive(),
+                Hidden::make('tel_hint')->dehydrated(false)->reactive(),
+
+                TextInput::make('cpf')
+                    ->label('CPF')
+                    ->mask('999.999.999-99')
+                    ->stripCharacters(['.', '-'])
+                    ->live(onBlur: true)
+                    ->rules([
+                        function ($attribute, $value, $fail) {
+                            $d = preg_replace('/\D+/', '', (string) $value);
+                            if ($d && !BrDocuments::cpf($d)) {
+                                $fail('CPF invÃ¡lido.');
+                            }
+                        },
+                    ])
+                    ->suffixIcon(fn ($get) => match ($get('cpf_ok')) {
+                        true  => 'heroicon-m-check-circle',
+                        false => 'heroicon-m-x-circle',
+                        default => null,
+                    })
+                    ->suffixIconColor(fn ($get) => $get('cpf_ok') ? 'success' : 'danger')
+                    ->hint(fn ($get) => $get('cpf_hint'))
+                    ->hintColor(fn ($get) => $get('cpf_ok') ? 'success' : 'danger')
+                    ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        $d = preg_replace('/\D+/', '', (string) $state);
+                        if (!$d) {
+                            $set('cpf_ok', null);
+                            $set('cpf_hint', null);
+                            return;
+                        }
+                        $ok = BrDocuments::cpf($d);
+                        $set('cpf_ok', $ok);
+                        $set('cpf_hint', $ok ? 'CPF vÃ¡lido.' : 'CPF invÃ¡lido.');
+                    })
+                    ->columnSpan(3),
+
+                TextInput::make('email')
+                    ->label('E-mail')
+                    ->email()
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->suffixIcon(fn ($get) => match ($get('email_ok')) {
+                        true  => 'heroicon-m-check-circle',
+                        false => 'heroicon-m-x-circle',
+                        default => null,
+                    })
+                    ->suffixIconColor(fn ($get) => $get('email_ok') ? 'success' : 'danger')
+                    ->hint(fn ($get) => $get('email_hint'))
+                    ->hintColor(fn ($get) => $get('email_ok') ? 'success' : 'danger')
+                    ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        if ($state === null || $state === '') {
+                            $set('email_ok', null);
+                            $set('email_hint', null);
+                            return;
+                        }
+                        $ok = filter_var($state, FILTER_VALIDATE_EMAIL) !== false;
+                        $set('email_ok', $ok);
+                        $set('email_hint', $ok ? 'E-mail vÃ¡lido.' : 'E-mail invÃ¡lido.');
+                    })
+                    ->columnSpan(4),
+
+                TextInput::make('telefone')
+                    ->label('Telefone')
+                    ->mask('(99) 9999-9999')
+                    ->stripCharacters(['(', ')', ' ', '-'])
+                    ->live(onBlur: true)
+                    ->rules(['nullable', 'regex:/^\d{10}$/'])
+                    ->validationMessages([
+                        'regex' => 'Telefone invÃ¡lido.',
+                    ])
+                    ->suffixIcon(fn ($get) => match ($get('tel_ok')) {
+                        true  => 'heroicon-m-check-circle',
+                        false => 'heroicon-m-x-circle',
+                        default => null,
+                    })
+                    ->suffixIconColor(fn ($get) => $get('tel_ok') ? 'success' : 'danger')
+                    ->hint(fn ($get) => $get('tel_hint'))
+                    ->hintColor(fn ($get) => $get('tel_ok') ? 'success' : 'danger')
+                    ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        if (!$state) { $set('tel_ok', null); $set('tel_hint', null); return; }
+                        $d = preg_replace('/\D+/', '', (string) $state);
+                        $ok = (bool) preg_match('/^\d{10}$/', $d);
+                        $set('tel_ok', $ok);
+                        $set('tel_hint', $ok ? 'Telefone vÃ¡lido.' : 'Telefone invÃ¡lido.');
+                    })
+                    ->columnSpan(3),
+
+                Hidden::make('celular_ok')->dehydrated(false)->reactive(),
+                Hidden::make('celular_hint')->dehydrated(false)->reactive(),
+                TextInput::make('celular')
+                    ->label('Celular / WhatsApp')
+                    ->mask('(99) 99999-9999')
+                    ->stripCharacters(['(', ')', ' ', '-'])
+                    ->live(onBlur: true)
+                    ->rules(['nullable', 'regex:/^\d{11}$/'])
+                    ->validationMessages([
+                        'regex' => 'Celular invÃ¡lido.',
+                    ])
+                    ->suffixIcon(fn ($get) => match ($get('celular_ok')) {
+                        true  => 'heroicon-m-check-circle',
+                        false => 'heroicon-m-x-circle',
+                        default => null,
+                    })
+                    ->suffixIconColor(fn ($get) => $get('celular_ok') ? 'success' : 'danger')
+                    ->hint(fn ($get) => $get('celular_hint'))
+                    ->hintColor(fn ($get) => $get('celular_ok') ? 'success' : 'danger')
+                    ->afterStateUpdated(function ($set, $get, ?string $state) {
+                        if (!$state) { $set('celular_ok', null); $set('celular_hint', null); return; }
+                        $d = preg_replace('/\D+/', '', (string) $state);
+                        $ok = (bool) preg_match('/^\d{11}$/', $d);
+                        $set('celular_ok', $ok);
+                        $set('celular_hint', $ok ? 'Celular vÃ¡lido.' : 'Celular invÃ¡lido.');
+                    })
+                    ->columnSpan(3),
+
+                Forms\Components\Toggle::make('principal')
+                    ->label('Contato principal?')
+                    ->inline(false)
+                    ->columnSpan(2),
+
+                Textarea::make('observacoes')
+                    ->label('ObservaÃ§Ãµes')
+                    ->rows(4)
+                    ->columnSpan(9),
+            ])
+            ->columns(12);
+    }
+
+    /**
+     * Define a tabela de exibiÃ§Ã£o das pessoas relacionadas ao cliente.
+     *
+     * @param Table $table
+     * @return Table
+     */
+    public function table(Table $table): Table
+    {
+        return $table
+            ->filters([
+                    TrashedFilter::make(), // << filtro Lixeira
+                ])
+            ->columns([
+                TextColumn::make('nome')->label('Nome')->searchable()->sortable(),
+                TextColumn::make('tipo')->label('Tipo')->badge()->sortable(),
+                TextColumn::make('cargo')->label('Cargo')->toggleable(),
+                TextColumn::make('email')->label('E-mail')->copyable()->toggleable(),
+                TextColumn::make('celular')->label('Celular')->toggleable(),
+
+                TextColumn::make('principal_label')
+                    ->label('Principal')
+                    ->state(fn (\App\Models\Pessoa $record) => $record->principal ? 'Principal' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn (\App\Models\Pessoa $record) => $record->principal ? 'success' : 'warning'),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('Nova pessoa')
+                    ->modalHeading('Criar Pessoa'),
+            ])
+            ->recordActions([
+                EditAction::make()->modalHeading('Editar Pessoa'),
+
+                /**
+                 * AÃ§Ã£o para definir o contato como principal.
+                 * Desmarca os demais contatos do cliente e marca o selecionado.
+                 */
+                Action::make('tornarPrincipal')
+                    ->label('Definir como principal')
+                    ->icon('heroicon-o-star')
+                    ->color('warning')
+                    ->visible(fn (\App\Models\Pessoa $record) => ! $record->principal)
+                    ->requiresConfirmation()
+                    ->action(function (\App\Models\Pessoa $record) {
+                        \App\Models\Pessoa::where('empresa_id', $record->empresa_id)
+                            ->update(['principal' => false]);
+                        $record->update(['principal' => true]);
+                    })
+                    ->successNotificationTitle('Contato marcado como principal'),
+
+                DeleteAction::make()->label('Excluir'),
+            ])
+            ->defaultSort('principal', 'desc')
+            ->groupedBulkActions([
+                DeleteBulkAction::make()->label('Excluir selecionados'),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\Schemas\ClienteForm.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\Schemas;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms;
+use App\Support\BrDocuments;
+use App\Services\CnpjLookup;
+
+class ClienteForm
+{
+    /**
+     * Cria e retorna o schema do formulÃ¡rio de cliente.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Dados do cliente')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\Radio::make('tipo_pessoa')
+                            ->label('Tipo')
+                            ->options(['PF' => 'Pessoa FÃ­sica', 'PJ' => 'Pessoa JurÃ­dica'])
+                            ->inline()
+                            ->default('PJ')
+                            ->live()
+                            ->columnSpan(3),
+
+                        Forms\Components\Hidden::make('doc_valid')->dehydrated(false)->reactive(),
+                        Forms\Components\Hidden::make('doc_hint')->dehydrated(false)->reactive(),
+
+                        Forms\Components\TextInput::make('cpf_cnpj')
+                            ->label('CPF / CNPJ')
+                            ->required()
+                            // Remove caracteres nÃ£o numÃ©ricos antes de salvar
+                            ->dehydrateStateUsing(fn ($state) => preg_replace('/\D+/', '', (string) $state))
+                            ->unique('empresas', 'cpf_cnpj', ignoreRecord: true)
+                            ->live(onBlur: true)
+                            // MÃ¡scara dinÃ¢mica conforme tipo de pessoa
+                            ->mask(fn ($get) => $get('tipo_pessoa') === 'PF'
+                                ? '999.999.999-99'
+                                : '99.999.999/9999-99'
+                            )
+                            // ValidaÃ§Ã£o customizada de CPF/CNPJ
+                            ->rules(fn ($get) => [
+                                function (string $attribute, $value, \Closure $fail) use ($get) {
+                                    $doc = \App\Support\BrDocuments::onlyDigits($value);
+                                    if ($get('tipo_pessoa') === 'PF') {
+                                        if (! \App\Support\BrDocuments::cpf($doc)) $fail('CPF invÃ¡lido.');
+                                    } else {
+                                        if (! \App\Support\BrDocuments::cnpj($doc)) $fail('CNPJ invÃ¡lido.');
+                                    }
+                                },
+                            ])
+                            // Ãcone de feedback de validaÃ§Ã£o
+                            ->suffixIcon(fn ($get) => match ($get('doc_valid')) {
+                                true  => 'heroicon-m-check-circle',
+                                false => 'heroicon-m-x-circle',
+                                default => null,
+                            })
+                            ->suffixIconColor(fn ($get) => $get('doc_valid') ? 'success' : 'danger')
+                            ->hint(fn ($get) => $get('doc_hint'))
+                            ->hintColor(fn ($get) => $get('doc_valid') ? 'success' : 'danger')
+                            // ApÃ³s atualizaÃ§Ã£o do campo, valida e tenta preencher dados via CNPJ
+                            ->afterStateUpdated(function ($get, $set, ?string $state) {
+                                $doc = BrDocuments::onlyDigits($state);
+
+                                if ($get('tipo_pessoa') === 'PF') {
+                                    $isValid = BrDocuments::cpf($doc);
+                                    $set('doc_valid', $isValid);
+                                    $set('doc_hint', $isValid ? 'CPF vÃ¡lido.' : 'CPF invÃ¡lido.');
+                                    return;
+                                }
+
+                                $isValid = BrDocuments::cnpj($doc);
+                                $set('doc_valid', $isValid);
+                                $set('doc_hint', $isValid ? 'CNPJ vÃ¡lido.' : 'CNPJ invÃ¡lido.');
+
+                                if (! $isValid) return;
+
+                                static $lastDoc = null;
+                                if ($lastDoc === $doc) return;
+                                $lastDoc = $doc;
+
+                                /** @var \App\Services\CnpjLookup $lookup */
+                                $lookup = app(CnpjLookup::class);
+                                if ($info = $lookup->fetch($doc)) {
+                                    if (! $get('razao_social') && ! empty($info['razao_social'])) {
+                                        $set('razao_social', $info['razao_social']);
+                                    }
+                                    if (! $get('nome_fantasia') && ! empty($info['nome_fantasia'])) {
+                                        $set('nome_fantasia', $info['nome_fantasia']);
+                                    }
+                                    if (! $get('end_rua') && ! empty($info['logradouro'])) $set('end_rua', $info['logradouro']);
+                                    if (! $get('end_bairro') && ! empty($info['bairro']))   $set('end_bairro', $info['bairro']);
+                                    if (! $get('end_cidade') && ! empty($info['municipio']))$set('end_cidade', $info['municipio']);
+                                    if (! $get('end_uf') && ! empty($info['uf']))           $set('end_uf', $info['uf']);
+                                    if (! $get('end_cep') && ! empty($info['cep']))         $set('end_cep', $info['cep']);
+                                }
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('razao_social')
+                            ->label(fn ($get) => $get('tipo_pessoa') === 'PF' ? 'Nome completo' : 'RazÃ£o social')
+                            ->required()
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('nome_fantasia')
+                            ->label('Nome fantasia')
+                            ->visible(fn ($get) => $get('tipo_pessoa') === 'PJ')
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('inscricao_estadual')
+                            ->label('InscriÃ§Ã£o Estadual')
+                            ->visible(fn ($get) => $get('tipo_pessoa') === 'PJ')
+                            // Desabilita se marcado como isento
+                            ->disabled(fn ($get) => (bool) $get('ie_isento'))
+                            ->helperText(fn ($get) => $get('ie_isento') ? 'IE marcada como isenta.' : null)
+                            ->columnSpan(3),
+
+                        Forms\Components\Toggle::make('ie_isento')
+                            ->label('IE isento?')
+                            ->inline(false)
+                            ->live()
+                            // Limpa inscriÃ§Ã£o estadual ao marcar como isento
+                            ->afterStateUpdated(function ($set, $state) {
+                                if ($state) {
+                                    $set('inscricao_estadual', null);
+                                }
+                            })
+                            ->visible(fn ($get) => $get('tipo_pessoa') === 'PJ')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('email_comercial')
+                            ->label('E-mail comercial')
+                            ->email()
+                            ->columnSpan(4),
+
+                        Forms\Components\TextInput::make('telefone_comercial')
+                            ->label('Telefone comercial')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('celular_comercial')
+                            ->label('Celular - WhatsApp')
+                            ->columnSpan(3),
+                    ]),
+
+                Section::make('Uso do sistema')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\TextInput::make('contrato')
+                            ->label('NÂ° do contrato')
+                            // Gera valor padrÃ£o: AAAA + nÃºmero sequencial
+                            ->default(function ($record) {
+                                if ($record?->contrato) {
+                                    return $record->contrato;
+                                }
+                                $year = date('Y');
+                                $seq = \App\Models\Cliente::nextContract($year);
+                                return $year . str_pad($seq, 6, '0', STR_PAD_LEFT);
+                            })
+                            ->readOnly()
+                            ->mask('999999999999')
+                            ->helperText('Gerado automaticamente.')
+                            ->columnSpan(4),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Status no sistema')
+                            ->options([
+                                'ATIVADO'    => 'Ativado',
+                                'DESATIVADO' => 'Desativado',
+                                'SUSPENSO'   => 'Suspenso',
+                                'BLOQUEADO'  => 'Bloqueado',
+                                'CANCELADO'  => 'Cancelado',
+                            ])
+                            ->default('ATIVADO')
+                            ->native(false)
+                            ->columnSpan(4),
+
+                        Forms\Components\Select::make('perfil')
+                            ->label('Perfil do cliente')
+                            ->options([
+                                'loja'     => 'Loja',
+                                'produtor' => 'Produtor',
+                            ])
+                            ->placeholder('Selecione...')
+                            ->nullable()
+                            ->default(null)
+                            // NÃ£o grava string vazia
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->native(false)
+                            ->columnSpan(2),
+
+                        Forms\Components\Select::make('plano_id')
+                            ->label('Plano')
+                            ->relationship('plano', 'nome')   // usa o relacionamento
+                            ->searchable()
+                            ->preload()
+                            ->native(false)
+                            ->columnSpan(4),
+
+                        Forms\Components\TextInput::make('dia_vencimento')
+                            ->label('Dia de vencimento')
+                            ->numeric()
+                            ->minValue(1)
+                            ->maxValue(31)
+                            ->columnSpan(2),
+
+                        Forms\Components\Textarea::make('observacoes')
+                            ->label('ObservaÃ§Ãµes internas')
+                            ->rows(4)
+                            ->columnSpan(12),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\Tables\ClientesTable.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes\Tables;
+
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column as ExcelColumn;
+use Maatwebsite\Excel\Excel;
+
+class ClientesTable
+{
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('contrato')->label('Contrato')->copyable(),
+                TextColumn::make('tipo_pessoa')->label('Tipo')->badge(),
+                TextColumn::make('razao_social')->label('Cliente')->searchable()->limit(40),
+                TextColumn::make('cpf_cnpj')->label('CPF/CNPJ')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('status')->label('Status')->badge(),
+                TextColumn::make('created_at')->label('Criado em')->date('d/m/Y')->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->headerActions([
+                ExportAction::make('exportar')
+                    ->label('Exportar')
+                    ->exports([
+                        ExcelExport::make('Clientes')
+                            ->fromTable()
+                            // Exclui alguma coluna que vocÃª nÃ£o quer exportar:
+                            ->except(['cpf_cnpj']) 
+                            // Define colunas e cabeÃ§alhos (ordem e labels ao seu gosto):
+                            ->withColumns([
+                                ExcelColumn::make('contrato')->heading('Contrato'),
+                                ExcelColumn::make('tipo_pessoa')->heading('Tipo'),
+                                ExcelColumn::make('razao_social')->heading('Cliente'),
+                                ExcelColumn::make('status')->heading('Status'),
+                                ExcelColumn::make('created_at')->heading('Criado em'),
+                            ])
+                            ->withFilename('empresas-clientes-' . now()->format('d-m-Y'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+            ])
+            ->actions([
+                EditAction::make()->label('Editar'),
+                DeleteAction::make()->label('Excluir'),
+            ])
+            ->bulkActions([
+                ExportBulkAction::make()
+                    ->exports([
+                        ExcelExport::make('Clientes selecionados')
+                            ->fromTable()
+                            // Exporta sÃ³ as colunas que vocÃª quer (alternativa ao ->except())
+                            ->only(['contrato','tipo_pessoa','razao_social','status','created_at'])
+                            ->withColumns([
+                                ExcelColumn::make('contrato')->heading('Contrato'),
+                                ExcelColumn::make('tipo_pessoa')->heading('Tipo'),
+                                ExcelColumn::make('razao_social')->heading('Cliente'),
+                                ExcelColumn::make('status')->heading('Status'),
+                                ExcelColumn::make('created_at')->heading('Criado em'),
+                            ])
+                            ->withFilename('clientes-selecionados-' . now()->format('Ymd-His'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),
+                ForceDeleteAction::make(),
+                DeleteAction::make(),
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\ClienteResource.php ===
+<?php
+
+namespace App\Filament\Resources\Clientes;
+
+use App\Filament\Resources\Clientes\Pages;
+use App\Filament\Resources\Clientes\Schemas\ClienteForm;
+use App\Filament\Resources\Clientes\Tables\ClientesTable;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+
+class ClienteResource extends Resource
+{
+    /**
+     * Modelo Eloquent associado ao recurso.
+     */
+    protected static ?string $model = \App\Models\Cliente::class;
+
+    /**
+     * Ãcone de navegaÃ§Ã£o no painel.
+     *
+     * @var string|\BackedEnum|null
+     */
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office';
+
+    /**
+     * RÃ³tulo singular do modelo.
+     */
+    protected static ?string $modelLabel = 'Cliente';
+
+    /**
+     * RÃ³tulo plural do modelo.
+     */
+    protected static ?string $pluralModelLabel = 'Clientes';
+
+    /**
+     * RÃ³tulo de navegaÃ§Ã£o no menu.
+     */
+    protected static ?string $navigationLabel = 'Clientes';
+
+    /**
+     * Atributo usado como tÃ­tulo do registro.
+     */
+    protected static ?string $recordTitleAttribute = 'razao_social';
+
+    /**
+     * Retorna o grupo de navegaÃ§Ã£o do recurso.
+     *
+     * @return \UnitEnum|string|null
+     */
+    public static function getNavigationGroup(): \UnitEnum|string|null
+    {
+        return 'GestÃ£o de clientes';
+    }
+
+    /**
+     * Define o schema do formulÃ¡rio do recurso.
+     *
+     * @param Schema $schema
+     * @return Schema
+     */
+    public static function form(Schema $schema): Schema
+    {
+        return ClienteForm::make($schema);
+    }
+
+    /**
+     * Define a tabela de listagem do recurso.
+     *
+     * @param Table $table
+     * @return Table
+     */
+    public static function table(Table $table): Table
+    {
+        return ClientesTable::make($table);
+    }
+
+    /**
+     * Retorna os relation managers associados ao recurso.
+     *
+     * @return array
+     */
+    public static function getRelations(): array
+    {
+        return [
+            \App\Filament\Resources\Clientes\RelationManagers\EnderecosRelationManager::class,
+            \App\Filament\Resources\Clientes\RelationManagers\PessoasRelationManager::class,
+            \App\Filament\Resources\Clientes\RelationManagers\ContabilidadeRelationManager::class,
+        ];
+    }
+
+    /**
+     * Define as rotas das pÃ¡ginas do recurso.
+     *
+     * @return array
+     */
+    public static function getPages(): array
+    {
+        return [
+            'index'  => Pages\ListClientes::route('/'),
+            'create' => Pages\CreateCliente::route('/criar'),
+            'edit'   => Pages\EditCliente::route('/{record}/editar'),
+        ];
+    }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'razao_social',
+            'nome_fantasia',
+            'cpf_cnpj',
+            'email_comercial',
+            'telefone_comercial',
+            'celular_comercial',
+            'contrato',
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->razao_social ?: ($record->nome_fantasia ?: 'Cliente');
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter([
+            'CPF/CNPJ' => $record->cpf_cnpj ?? null,
+            'Contrato' => $record->contrato ?? null,
+            'Status'   => $record->status ?? null,
+        ]);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record, ?string $panel = null): string
+    {
+        return static::getUrl('edit', ['record' => $record]);
+    }
+
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Clientes\README_DOMINIO.md ===
+# Marokah â€¢ MÃ³dulo de Clientes (Laravel 12 + Filament)
+
+Este mÃ³dulo oferece uma soluÃ§Ã£o robusta para a gestÃ£o de clientes, endereÃ§os, pessoas de contato e contabilidades, utilizando Laravel 12 e Filament. Inclui validaÃ§Ãµes em tempo real, preenchimento automÃ¡tico por CEP/CNPJ e controles de entidade principal/padrÃ£o, proporcionando uma experiÃªncia de usuÃ¡rio eficiente e segura.
+
+---
+
+## âœ¨ Principais Funcionalidades
+
+- **Cadastro de Clientes (PF/PJ)**
+  - MÃ¡scara dinÃ¢mica e validaÃ§Ã£o de CPF/CNPJ com feedback visual.
+  - Auto-preenchimento de dados via CNPJ utilizando [BrasilAPI].
+  - Campos comerciais: e-mail, telefone, WhatsApp.
+  - GeraÃ§Ã£o automÃ¡tica de contrato (`MK-AAAA-000001`) com 6 dÃ­gitos sequenciais.
+  - Campo de perfil do cliente (opcional): Loja / Produtor (nÃ£o exibido se nulo).
+
+- **GestÃ£o de EndereÃ§os**
+  - Busca de CEP com validaÃ§Ã£o visual.
+  - Preenchimento automÃ¡tico de endereÃ§o via tabela local ou fallback BrasilAPI.
+  - AÃ§Ã£o "Definir como padrÃ£o" (um endereÃ§o padrÃ£o por cliente).
+  - ExibiÃ§Ã£o de CEP formatado (`99999-999`).
+
+- **GestÃ£o de Pessoas**
+  - ValidaÃ§Ã£o de CPF, e-mail, telefone fixo e celular/WhatsApp com feedback visual.
+  - AÃ§Ã£o "Definir como principal" (uma pessoa principal por cliente).
+  - IndicaÃ§Ã£o visual de principal na listagem.
+
+- **GestÃ£o de Contabilidade**
+  - ValidaÃ§Ã£o de CNPJ, e-mail e telefone.
+  - AÃ§Ã£o "Definir como principal" (uma contabilidade principal por cliente).
+  - FormataÃ§Ã£o de telefone na listagem.
+
+- **ExperiÃªncia do UsuÃ¡rio**
+  - Feedback visual direto nos campos (Ã­cone + mensagem).
+  - MÃ¡scaras amigÃ¡veis para entrada de dados; persistÃªncia apenas de dÃ­gitos no banco.
+
+---
+
+## ðŸ§± Requisitos
+
+- PHP 8.2+
+- Composer
+- MySQL/MariaDB
+- Laravel 12.x
+- Filament v3
+- ExtensÃµes PHP comuns (`pdo_mysql`, `mbstring`, etc.)
+
+---
+
+## ðŸ§­ Estrutura de Pastas
+
+```
+app/
+ â””â”€ Filament/
+     â””â”€ Resources/
+         â””â”€ Clientes/
+             â”œâ”€ ClienteResource.php
+             â”œâ”€ Pages/
+             â”‚   â”œâ”€ CreateCliente.php
+             â”‚   â”œâ”€ EditCliente.php
+             â”‚   â””â”€ ListClientes.php
+             â”œâ”€ RelationManagers/
+             â”‚   â”œâ”€ EnderecosRelationManager.php
+             â”‚   â”œâ”€ PessoasRelationManager.php
+             â”‚   â””â”€ ContabilidadeRelationManager.php
+             â””â”€ Schemas/
+                 â””â”€ ClienteForm.php
+app/
+ â”œâ”€ Models/
+ â”‚   â”œâ”€ Cliente.php           # tabela: `empresas`
+ â”‚   â”œâ”€ Endereco.php          # tabela: `enderecos`
+ â”‚   â”œâ”€ Pessoa.php            # tabela: `pessoas`
+ â”‚   â””â”€ Contabilidade.php     # tabela: `contabilidades`
+ â”œâ”€ Services/
+ â”‚   â””â”€ CnpjLookup.php        # IntegraÃ§Ã£o BrasilAPI
+ â””â”€ Support/
+     â””â”€ BrDocuments.php       # ValidaÃ§Ã£o CPF/CNPJ
+```
+
+---
+
+## ðŸ—‚ï¸ Esquema de Banco (Resumo)
+
+- **ColaÃ§Ã£o recomendada:** `utf8mb4_unicode_ci`
+
+### Tabelas
+
+#### `empresas` (Model: Cliente)
+- `id`, `tipo_pessoa` (PF|PJ), `cpf_cnpj`, `razao_social`, `nome_fantasia` (nullable)
+- `email_comercial`, `telefone_comercial`, `celular_comercial`
+- `status` (ATIVADO|DESATIVADO|SUSPENSO|BLOQUEADO|CANCELADO)
+- `contrato` (auto: MK-YYYY-000001)
+- `dia_vencimento` (1..31)
+- `perfil` (nullable: loja|produtor)
+- `observacoes`, `timestamps`
+
+> **Regra:** O cÃ³digo do contrato Ã© gerado automaticamente em `Cliente::booted()` se nÃ£o informado.
+
+#### `enderecos`
+- `id`, `empresa_id` (FK), `tipo` (principal|cobranca|entrega|outro)
+- `rotulo`, `cep` (apenas dÃ­gitos), `rua`, `numero`, `complemento`, `referencia`
+- `bairro`, `cidade`, `uf`
+- `padrao` (bool), `timestamps`
+
+> **Regra:** Ao definir `padrao = true`, os demais endereÃ§os do cliente sÃ£o atualizados para `false`.
+
+#### `pessoas`
+- `id`, `empresa_id` (FK), `tipo` (representante|financeiro|compras|fiscal|comercial|suporte|ti|outro)
+- `nome`, `cargo` (nullable), `cpf` (apenas dÃ­gitos/nulo)
+- `email`, `telefone` (apenas dÃ­gitos/nulo), `celular` (apenas dÃ­gitos/nulo)
+- `principal` (bool), `observacoes` (nullable), `timestamps`
+
+> **Regra:** Ao marcar `principal = true`, as demais pessoas do cliente sÃ£o definidas como `false`.
+
+#### `contabilidades`
+- `id`, `empresa_id` (FK)
+- `razao_social` (nullable), `cnpj` (apenas dÃ­gitos/nulo)
+- `nome_contato`, `email`, `telefone` (apenas dÃ­gitos/nulo)
+- `principal` (bool), `ordem` (int, opcional), `observacoes` (nullable), `timestamps`
+
+> **Regra:** Ao marcar `principal = true`, as demais contabilidades do cliente sÃ£o atualizadas para `false`.
+
+#### Chaves Estrangeiras
+
+Garanta as FKs para integridade referencial:
+
+```sql
+ALTER TABLE enderecos
+  ADD CONSTRAINT fk_enderecos_empresas
+  FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+  ON DELETE CASCADE;
+
+ALTER TABLE pessoas
+  ADD CONSTRAINT fk_pessoas_empresas
+  FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+  ON DELETE CASCADE;
+
+ALTER TABLE contabilidades
+  ADD CONSTRAINT fk_contabilidades_empresas
+  FOREIGN KEY (empresa_id) REFERENCES empresas(id)
+  ON DELETE CASCADE;
+```
+
+> Se necessÃ¡rio, ajuste os dados antes de criar as FKs ou utilize sem `ON DELETE` e ajuste posteriormente.
+
+---
+
+## ðŸ§© Detalhamento das Funcionalidades
+
+### 1. Cliente (PF/PJ)
+- Campo CPF/CNPJ com mÃ¡scara dinÃ¢mica e validaÃ§Ã£o via `App\Support\BrDocuments`.
+- Feedback visual (Ã­cone e mensagem).
+- Auto-preenchimento de dados via CNPJ (BrasilAPI): razÃ£o social, fantasia, endereÃ§o.
+- Perfil do cliente: loja | produtor (nÃ£o exibido se nulo).
+
+### 2. EndereÃ§os
+- Campo CEP com mÃ¡scara e validaÃ§Ã£o.
+- Busca local e fallback BrasilAPI.
+- Feedback visual (Ã­cone e dica).
+- AÃ§Ã£o "Definir como padrÃ£o" (apenas um por cliente).
+- ExibiÃ§Ã£o formatada do CEP.
+
+### 3. Pessoas
+- ValidaÃ§Ã£o de CPF, e-mail, telefone e celular.
+- AÃ§Ã£o "Definir como principal" (apenas uma por cliente).
+- IndicaÃ§Ã£o visual de principal na tabela.
+
+### 4. Contabilidade
+- ValidaÃ§Ã£o de CNPJ, e-mail e telefone.
+- AÃ§Ã£o "Definir como principal" (apenas uma por cliente).
+- FormataÃ§Ã£o de telefone na listagem.
+
+---
+
+## ðŸ” ReferÃªncias & Integridade
+
+- Utilize chaves estrangeiras para garantir integridade referencial e facilitar integraÃ§Ãµes e exclusÃµes em cascata.
+- Caso o banco de dados nÃ£o permita a criaÃ§Ã£o imediata das FKs, realize a limpeza dos dados ou ajuste as constraints posteriormente.
+
+---
+
+## ðŸ©º Troubleshooting
+
+- **"Field 'nome' doesnâ€™t have a default value":** Verifique o atributo `fillable` do modelo Cliente e a correspondÃªncia dos campos do formulÃ¡rio.
+- **"Unknown column 'padrao' in order clause":** Use `->defaultSort('principal', 'desc')` para Pessoas/Contabilidade; `padrao` Ã© exclusivo de EndereÃ§os.
+- **ValidaÃ§Ãµes com `$attribute` indisponÃ­vel:** Em Filament v3, utilize closures em `->rules()` para evitar erros de resoluÃ§Ã£o de container.
+- **Telefone exibindo "-":** Indica valor nulo ou quantidade de dÃ­gitos invÃ¡lida (diferente de 10/11).
+
+---
+
+## ðŸ§° ConvenÃ§Ãµes
+
+- PersistÃªncia apenas de dÃ­gitos para CPF/CNPJ/telefones/CEP.
+- MÃ¡scaras aplicadas apenas na interface.
+- Apenas um registro principal/padrÃ£o por cliente (endereÃ§os, pessoas, contabilidade).
+- Feedback visual consistente (Ã­cone e mensagem).
+- Fallback para BrasilAPI sem chave, com timeouts curtos e silenciosos.
+
+---
+
+## ðŸ“„ LicenÃ§a
+
+Projeto interno Marokah. Todos os direitos reservados.
+
+---
+
+## CrÃ©ditos
+
+- [FilamentPHP](https://filamentphp.com/)
+- [BrasilAPI](https://brasilapi.com.br/)
+- Equipe Marokah â€” MÃ³dulo de Clientes
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\Pages\CreateFatura.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas\Pages;
+
+use App\Filament\Resources\Faturas\FaturaResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateFatura extends CreateRecord
+{
+    protected static string $resource = FaturaResource::class;
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\Pages\EditFatura.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas\Pages;
+
+use App\Filament\Resources\Faturas\FaturaResource;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Resources\Pages\EditRecord;
+
+class EditFatura extends EditRecord
+{
+    protected static string $resource = FaturaResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\Pages\ListFaturas.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas\Pages;
+
+use App\Filament\Resources\Faturas\FaturaResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+
+class ListFaturas extends ListRecords
+{
+    protected static string $resource = FaturaResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\Schemas\FaturaForm.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas\Schemas;
+
+use Filament\Forms;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use App\Models\Assinatura;
+use App\Enums\SubscriptionStatus;
+use App\Models\Fatura;
+
+class FaturaForm
+{
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Dados da fatura')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\Select::make('empresa_id')
+                            ->label('Cliente')
+                            ->relationship('empresa', 'nome')
+                            ->searchable()->preload()->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $get, $state) {
+                                // Assinatura ativa mais recente do cliente
+                                $assinatura = Assinatura::where('empresa_id', $state)
+                                    ->where('status', SubscriptionStatus::ATIVA)
+                                    ->latest('started_at')
+                                    ->first();
+
+                                $set('assinatura_id', $assinatura?->id);
+
+                                if ($assinatura) {
+                                    $valor = $assinatura->valorEfetivo();
+                                    $set('subtotal', $valor);
+                                    $set('descontos', 0);
+                                    $set('acrescimos', 0);
+                                    $set('total', $valor);
+                                    $set('vencimento', optional($assinatura->nextDueDate())->toDateString());
+                                    $set('referencia_ini', now()->startOfMonth()->toDateString());
+                                    $set('referencia_fim', now()->endOfMonth()->toDateString());
+                                }
+                            })
+                            ->columnSpan(6),
+
+                            Forms\Components\Select::make('assinatura_id')
+                                ->label('Assinatura')
+                                ->options(fn ($get) => \App\Models\Assinatura::query()
+                                    ->where('empresa_id', $get('empresa_id'))
+                                    ->orderByDesc('started_at')
+                                    ->get()
+                                    ->mapWithKeys(fn ($a) => [
+                                        $a->id => sprintf('#%d â€¢ %s â€¢ R$ %s â€¢ %s',
+                                            $a->id,
+                                            $a->plano?->nome ?? 'â€”',
+                                            number_format($a->valorEfetivo(), 2, ',', '.'),
+                                            optional($a->started_at)->format('d/m/Y') ?? 'sem inÃ­cio'
+                                        ),
+                                    ])
+                                )
+                                ->searchable()->preload()
+                                ->rule(function ($get) {
+                                    return function (string $attribute, $value, \Closure $fail) use ($get) {
+                                        if (!$value) return;
+                                        $ok = \App\Models\Assinatura::where('id', $value)
+                                            ->where('empresa_id', $get('empresa_id'))
+                                            ->exists();
+                                        if (!$ok) $fail('A assinatura selecionada nÃ£o pertence ao cliente escolhido.');
+                                    };
+                                })
+                                ->columnSpan(6),
+                    ]),
+
+                // â¬‡ï¸ SeÃ§Ã£o recolocada com os campos de valores, datas e referÃªncia
+                Section::make('Valores e vencimento')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\TextInput::make('subtotal')
+                            ->label('Subtotal')
+                            ->numeric()->minValue(0)->step('0.01')->prefix('R$')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record) $set('subtotal', (float) $record->subtotal);
+                            })
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $get) {
+                                $s = (float) $get('subtotal');
+                                $d = (float) $get('descontos');
+                                $a = (float) $get('acrescimos');
+                                $set('total', round($s - $d + $a, 2));
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('descontos')
+                            ->label('Descontos')
+                            ->numeric()->minValue(0)->step('0.01')->prefix('R$')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record) $set('descontos', (float) $record->descontos);
+                            })
+                            ->default(0)
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $get) {
+                                $s = (float) $get('subtotal');
+                                $d = (float) $get('descontos');
+                                $a = (float) $get('acrescimos');
+                                $set('total', round($s - $d + $a, 2));
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('acrescimos')
+                            ->label('AcrÃ©scimos')
+                            ->numeric()->minValue(0)->step('0.01')->prefix('R$')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record) $set('acrescimos', (float) $record->acrescimos);
+                            })
+                            ->default(0)
+                            ->reactive()
+                            ->afterStateUpdated(function ($set, $get) {
+                                $s = (float) $get('subtotal');
+                                $d = (float) $get('descontos');
+                                $a = (float) $get('acrescimos');
+                                $set('total', round($s - $d + $a, 2));
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('total')
+                            ->label('Total')
+                            ->numeric()->step('0.01')->prefix('R$')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record) $set('total', (float) $record->total);
+                            })
+                            ->readOnly()
+                            ->dehydrated(true)
+                            ->columnSpan(3),
+
+                        Forms\Components\DatePicker::make('vencimento')
+                            ->label('Data de vencimento')
+                            ->required()
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record && $record->vencimento) {
+                                    $set('vencimento', $record->vencimento->toDateString());
+                                }
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\DatePicker::make('referencia_ini')
+                            ->label('Ref. (inÃ­cio)')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record && $record->referencia_ini) {
+                                    $set('referencia_ini', $record->referencia_ini->toDateString());
+                                }
+                            })
+                            ->columnSpan(3),
+
+                        Forms\Components\DatePicker::make('referencia_fim')
+                            ->label('Ref. (fim)')
+                            ->afterStateHydrated(function ($get, $set, ?Fatura $record) {
+                                if ($record && $record->referencia_fim) {
+                                    $set('referencia_fim', $record->referencia_fim->toDateString());
+                                }
+                            })
+                            ->columnSpan(3),
+                    ]),
+
+                Section::make('ObservaÃ§Ãµes')
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\Textarea::make('descricao')
+                            ->label('DescriÃ§Ã£o / ObservaÃ§Ãµes')
+                            ->rows(3),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\Tables\FaturasTable.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas\Tables;
+
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+
+class FaturasTable
+{
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->defaultSort('vencimento')
+            ->columns([
+                Tables\Columns\TextColumn::make('id')->label('#')->sortable(),
+                // ðŸ‘‡ usa a relaÃ§Ã£o empresa
+                Tables\Columns\TextColumn::make('empresa.nome')->label('Cliente')->searchable(),
+                Tables\Columns\TextColumn::make('status')
+                    ->label('Status')
+                    ->badge()
+                    ->formatStateUsing(fn ($r) => $r && $r->status && method_exists($r->status, 'label') ? $r->status->label() : ((string) ($r->status ?? '-')))
+                    ->color(fn ($r) => $r && $r->status && method_exists($r->status, 'color') ? $r->status->color() : 'gray'),
+                Tables\Columns\TextColumn::make('total')->label('Total')->money('BRL', true)->sortable(),
+                Tables\Columns\TextColumn::make('vencimento')->label('Vencimento')->date('d/m/Y')->sortable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->options([
+                        'ABERTA' => 'Aberta',
+                        'PAGA' => 'Paga',
+                        'ATRASADA' => 'Atrasada',
+                        'CANCELADA' => 'Cancelada',
+                    ]),
+            ])
+            ->actions([
+                EditAction::make()->label('Editar'),
+            ])
+            ->bulkActions([
+                DeleteBulkAction::make(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Faturas\FaturaResource.php ===
+<?php
+
+namespace App\Filament\Resources\Faturas;
+
+use App\Filament\Resources\Faturas\Pages\CreateFatura;
+use App\Filament\Resources\Faturas\Pages\EditFatura;
+use App\Filament\Resources\Faturas\Pages\ListFaturas;
+use App\Filament\Resources\Faturas\Schemas\FaturaForm;
+use App\Filament\Resources\Faturas\Tables\FaturasTable;
+use App\Models\Fatura;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+
+class FaturaResource extends Resource
+{
+    protected static ?string $model = Fatura::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedReceiptRefund;
+
+    // ðŸ‘‡ agrupa no menu Faturamento e define a ordem
+    protected static string|\UnitEnum|null $navigationGroup = 'Faturamento';
+    protected static ?string $navigationLabel = 'Faturas';
+    protected static ?int $navigationSort = 30;
+
+    protected static ?string $recordTitleAttribute = 'id';
+
+    public static function form(Schema $schema): Schema
+    {
+        return FaturaForm::make($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return FaturasTable::make($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListFaturas::route('/'),
+            'create' => CreateFatura::route('/create'),
+            'edit' => EditFatura::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRecordRouteBindingEloquentQuery(): Builder
+    {
+        return parent::getRecordRouteBindingEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\Pages\CreatePlano.php ===
+<?php
+
+namespace App\Filament\Resources\Planos\Pages;
+
+use App\Filament\Resources\Planos\PlanoResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreatePlano extends CreateRecord
+{
+    protected static string $resource = PlanoResource::class;
+
+    protected static ?string $title = 'Criar plano';
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\Pages\EditPlano.php ===
+<?php
+
+namespace App\Filament\Resources\Planos\Pages;
+
+use App\Filament\Resources\Planos\PlanoResource;
+use Filament\Resources\Pages\EditRecord;
+
+class EditPlano extends EditRecord
+{
+    protected static string $resource = PlanoResource::class;
+
+    protected static ?string $title = 'Editar plano';
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\Pages\ListPlanos.php ===
+<?php
+
+namespace App\Filament\Resources\Planos\Pages;
+
+use App\Filament\Resources\Planos\PlanoResource;
+use Filament\Resources\Pages\ListRecords;
+
+class ListPlanos extends ListRecords
+{
+    protected static string $resource = PlanoResource::class;
+
+    protected static ?string $title = 'Planos';
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\Schemas\PlanoForm.php ===
+<?php
+
+namespace App\Filament\Resources\Planos\Schemas;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms;
+use Illuminate\Validation\Rules\Unique;
+
+class PlanoForm
+{
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('InformaÃ§Ãµes do plano')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->schema([
+                        Forms\Components\TextInput::make('nome')
+                            ->label('Nome do plano')
+                            ->required()
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule, $get) =>
+                                    $rule->where('periodicidade', strtoupper((string) $get('periodicidade')))
+                            )
+                            ->columnSpan(6),
+
+                        Forms\Components\Select::make('periodicidade')
+                            ->label('Periodicidade')
+                            ->options([
+                                'MENSAL'     => 'Mensal',
+                                'TRIMESTRAL' => 'Trimestral',
+                                'SEMESTRAL'  => 'Semestral',
+                                'ANUAL'      => 'Anual',
+                            ])
+                            ->default('MENSAL')
+                            ->required()
+                            ->native(false)
+                            ->columnSpan(3)
+                            // Normaliza em uppercase ao salvar
+                            ->dehydrateStateUsing(fn ($state) => strtoupper((string) $state)),
+
+                        Forms\Components\TextInput::make('valor')
+                            ->label('Valor do plano')
+                            ->numeric()
+                            ->prefix('R$')
+                            ->minValue(0)
+                            ->step('0.01')
+                            ->required()
+                            ->helperText('Valor da mensalidade ou recorrÃªncia do plano.')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('taxa_adesao')
+                            ->label('Taxa de adesÃ£o')
+                            ->numeric()
+                            ->prefix('R$')
+                            ->step('0.01')
+                            ->helperText('Taxa cobrada apenas na adesÃ£o (opcional).')
+                            ->columnSpan(3),
+
+                        Forms\Components\TextInput::make('trial_dias')
+                            ->label('Dias de teste grÃ¡tis')
+                            ->numeric()
+                            ->minValue(0)
+                            ->maxValue(60)
+                            ->helperText('PerÃ­odo de teste gratuito (0 para nÃ£o oferecer).')
+                            ->columnSpan(3),
+
+                        Forms\Components\Select::make('status')
+                            ->label('Status do plano')
+                            ->options(['ATIVO' => 'Ativo', 'INATIVO' => 'Inativo'])
+                            ->default('ATIVO')
+                            ->native(false)
+                            ->columnSpan(3),
+
+                        Forms\Components\Toggle::make('oculto')
+                            ->label('Ocultar na listagem pÃºblica?')
+                            ->helperText('Se marcado, o plano nÃ£o aparece para novos clientes.')
+                            ->columnSpan(3),
+
+                        Forms\Components\Textarea::make('descricao')
+                            ->label('DescriÃ§Ã£o detalhada')
+                            ->rows(4)
+                            ->helperText('DescriÃ§Ã£o longa, benefÃ­cios, observaÃ§Ãµes, etc.')
+                            ->columnSpan(12),
+                    ]),
+
+                Section::make('Recursos e limites')
+                    ->columnSpanFull()
+                    ->columns(12)
+                    ->collapsible()
+                    ->schema([
+                        Forms\Components\KeyValue::make('recursos')
+                            ->label('Recursos (chave â†’ descriÃ§Ã£o curta)')
+                            ->addButtonLabel('Adicionar recurso')
+                            ->columnSpan(6),
+
+                        Forms\Components\KeyValue::make('limites')
+                            ->label('Limites (chave â†’ nÃºmero)')
+                            ->addButtonLabel('Adicionar limite')
+                            ->columnSpan(6),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\Tables\PlanosTable.php ===
+<?php
+
+namespace App\Filament\Resources\Planos\Tables;
+
+use App\Models\Plano;
+use BackedEnum;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Excel;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Columns\Column as ExcelColumn;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use App\Enums\PlanStatus;
+
+class PlanosTable
+{
+    /** RÃ³tulos da periodicidade */
+    private const PERIOD_LABELS = [
+        'MENSAL'     => 'Mensal',
+        'TRIMESTRAL' => 'Trimestral',
+        'SEMESTRAL'  => 'Semestral',
+        'ANUAL'      => 'Anual',
+    ];
+
+    /* ======================== Helpers de normalizaÃ§Ã£o ======================== */
+
+    /** Desembrulha enums e pega o valor cru do DB quando necessÃ¡rio */
+    private static function raw(mixed $v): mixed
+    {
+        if ($v instanceof BackedEnum) {
+            return $v->value;
+        }
+        return $v;
+    }
+
+    /** Normaliza valores â€œverdadeirosâ€ (1, '1', true, 'true', 'sim') */
+    private static function truthy(mixed $v): bool
+    {
+        $v = self::raw($v);
+
+        if (is_bool($v)) return $v;
+        if (is_numeric($v)) return (int) $v === 1;
+        if (is_string($v)) {
+            $v = trim(mb_strtolower($v));
+            return in_array($v, ['1', 'true', 't', 'sim', 's', 'y', 'yes', 'ativo', 'active'], true);
+        }
+        return false;
+    }
+
+    /** Ã‰ status ativo independentemente do formato salvo */
+    private static function isActive(mixed $status): bool
+    {
+        $status = self::raw($status);
+
+        if (is_string($status)) {
+            $s = mb_strtoupper(trim($status));
+            return in_array($s, ['ATIVO', 'ACTIVE', 'A'], true);
+        }
+        return self::truthy($status);
+    }
+
+    /** Retorna a string padronizada (ATIVO | INATIVO) */
+    private static function normalizedStatus(mixed $status): string
+    {
+        return self::isActive($status) ? 'ATIVO' : 'INATIVO';
+    }
+
+    private static function periodLabel(?string $state): ?string
+    {
+        if ($state === null || $state === '') return null;
+        $key = strtoupper((string) $state);
+        return self::PERIOD_LABELS[$key] ?? $state;
+    }
+
+    private static function periodColor(?string $state): string
+    {
+        return match (strtoupper((string) $state)) {
+            'MENSAL'     => 'primary',
+            'TRIMESTRAL' => 'info',
+            'SEMESTRAL'  => 'warning',
+            'ANUAL'      => 'success',
+            default      => 'gray',
+        };
+    }
+
+    private static function money($v): string
+    {
+        // Considera null, string vazia, '0', 0, 0.0, '0.00' como zero
+        if ($v === null || $v === '' || $v === false) {
+            $n = 0.0;
+        } else if (is_numeric($v)) {
+            $n = (float) $v;
+        } else {
+            $n = 0.0;
+        }
+        return 'R$ ' . number_format($n, 2, ',', '.');
+    }
+
+    /** Gera um nome Ãºnico para a duplicaÃ§Ã£o */
+    private static function nextCopyName(string $base): string
+    {
+        $name = $base . ' (cÃ³pia)';
+        $i = 2;
+        while (Plano::where('nome', $name)->exists()) {
+            $name = $base . " (cÃ³pia {$i})";
+            $i++;
+        }
+        return $name;
+    }
+
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->reorderable('ordem')
+            ->defaultSort('ordem')
+            ->columns([
+                TextColumn::make('nome')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('periodicidade')
+                    ->label('Periodicidade')
+                    ->state(fn ($record) =>
+                        ($p = data_get($record, 'periodicidade')) instanceof \App\Enums\PlanPeriod
+                            ? $p
+                            : (is_string($p) ? \App\Enums\PlanPeriod::tryFrom(strtoupper($p)) ?? $p : $p)
+                    )
+                    ->formatStateUsing(fn ($state) =>
+                        $state instanceof \App\Enums\PlanPeriod
+                            ? $state->label()
+                            : (is_string($state) ? self::periodLabel($state) : 'â€”')
+                    )
+                    ->badge()
+                    ->color(fn ($state) =>
+                        $state instanceof \App\Enums\PlanPeriod
+                            ? $state->color()
+                            : (is_string($state) ? self::periodColor($state) : 'gray')
+                    )
+                    ->sortable(),
+
+                TextColumn::make('valor')
+                    ->label('Valor')
+                    ->alignRight()
+                    ->formatStateUsing(fn ($_, $record) => self::money($record->valor))
+                    ->extraAttributes(function ($record) {
+                        return ($record->valor !== null && (float) $record->valor == 0.0)
+                            ? ['class' => 'font-medium']
+                            : [];
+                    })
+                    ->sortable(),
+
+                // STATUS: verde ATIVO, vermelho INATIVO â€” com suporte a Enum/booleans
+                TextColumn::make('status')
+                    ->label('Status')
+                    ->state(function ($record) {
+                        // $record->status jÃ¡ Ã© PlanStatus por causa do cast
+                        return $record->status instanceof PlanStatus
+                            ? $record->status->label()
+                            : (mb_strtoupper((string) $record->status) === 'ATIVO' ? 'ATIVO' : 'INATIVO');
+                    })
+                    ->badge()
+                    ->color(function ($record) {
+                        return $record->status instanceof PlanStatus
+                            ? $record->status->color()
+                            : (mb_strtoupper((string) $record->status) === 'ATIVO' ? 'success' : 'danger');
+                    })
+                    ->alignCenter()
+                    ->sortable(),
+
+                // OCULTO: Sim/NÃ£o com cores (Sim = danger, NÃ£o = success)
+                TextColumn::make('oculto')
+                    ->label('Oculto')
+                    ->state(fn (Plano $r) => $r->oculto ? 'Sim' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn (Plano $r) => $r->oculto ? 'danger' : 'success')
+                    ->alignCenter(),
+
+                TextColumn::make('clientes_count')
+                    ->counts('clientes')
+                    ->label('Clientes vinculados')
+                    ->sortable()
+                    ->description('vinculados')
+                    ->alignCenter(),
+            ])
+            ->filters([
+                SelectFilter::make('periodicidade')
+                    ->label('Periodicidade')
+                    ->options(self::PERIOD_LABELS),
+
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options(['ATIVO' => 'Ativo', 'INATIVO' => 'Inativo'])
+                    ->indicator('Status')
+                    ->native(false),
+
+                TernaryFilter::make('oculto')->label('Oculto'),
+
+                Filter::make('valor')
+                    ->label('Valor (faixa)')
+                    ->form([
+                        \Filament\Forms\Components\TextInput::make('min')->label('Valor mÃ­nimo')->numeric()->prefix('R$'),
+                        \Filament\Forms\Components\TextInput::make('max')->label('Valor mÃ¡ximo')->numeric()->prefix('R$'),
+                    ])
+                    ->query(function ($query, array $data) {
+                        if ($data['min'] !== null && $data['min'] !== '') {
+                            $query->where('valor', '>=', $data['min']);
+                        }
+                        if ($data['max'] !== null && $data['max'] !== '') {
+                            $query->where('valor', '<=', $data['max']);
+                        }
+                    }),
+            ])
+            ->actions([
+                ViewAction::make('detalhes')
+                    ->label('Detalhes')
+                    ->icon('heroicon-o-eye')
+                    ->color('info')
+                    ->tooltip('Visualizar detalhes do plano')
+                    ->modalWidth('4xl')
+                    ->modalHeading(fn ($record) => 'Detalhes do plano: ' . ($record->nome ?? 'â€”'))
+                    ->modalContent(function ($record) {
+                        $record->loadCount('clientes');
+                        $periodLabels = self::PERIOD_LABELS;
+                        $money = fn ($v) => self::money($v);
+                        return view('filament.planos._detalhes', [
+                            'p'            => $record,
+                            'periodLabels' => $periodLabels,
+                            'money'        => $money,
+                        ]);
+                    })
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Fechar'),
+
+            // Alternar ATIVO/INATIVO (rÃ³tulo: "Ativo" quando inativo; "Inativar" quando ativo)
+            Action::make('alternarStatus')
+                ->label(fn (?Plano $r) => ($r && $r->is_active) ? 'Inativar' : 'Ativar')
+                ->color(fn (?Plano $r) => ($r && $r->is_active) ? 'danger' : 'success')
+                ->icon('heroicon-o-power')
+                ->tooltip(fn (?Plano $r) => ($r && $r->is_active) ? 'Inativar plano' : 'Ativar plano')
+                ->requiresConfirmation()
+                ->action(function (Plano $record) {
+                    $toActive = ! $record->is_active;
+                    $record->update([
+                        'status' => $toActive ? \App\Enums\PlanStatus::ATIVO : \App\Enums\PlanStatus::INATIVO,
+                    ]);
+
+                    \Filament\Notifications\Notification::make()
+                        ->title($toActive ? 'Plano ativado com sucesso.' : 'Plano inativado com sucesso.')
+                        ->success()
+                        ->send();
+                }),
+
+                // Alternar oculto/exibir
+                Action::make('alternarOculto')
+                    // rÃ³tulo: se estÃ¡ oculto -> Exibir; se estÃ¡ visÃ­vel -> Ocultar
+                    ->label(fn (?Plano $r) => ($r && $r->oculto) ? 'Exibir' : 'Ocultar')
+                    ->icon(fn (?Plano $r) => ($r && $r->oculto) ? 'heroicon-o-eye' : 'heroicon-o-eye-slash')
+                    ->color(fn (?Plano $r) => ($r && $r->oculto) ? 'success' : 'warning')
+                    ->tooltip(fn (?Plano $r) => ($r && $r->oculto) ? 'Exibir na vitrine' : 'Ocultar da vitrine')
+
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (?Plano $r) => ($r && $r->oculto) ? 'Exibir plano' : 'Ocultar plano')
+                    ->modalDescription(fn (?Plano $r) => ($r && $r->oculto)
+                        ? 'O plano serÃ¡ exibido novamente nas listagens e pode aparecer em vitrines pÃºblicas e integraÃ§Ãµes.'
+                        : 'O plano serÃ¡ ocultado das listagens pÃºblicas e catÃ¡logos. Ele pode deixar de aparecer em vitrines e integraÃ§Ãµes.'
+                    )
+
+                    ->action(function (Plano $record, Action $action) {
+                        // calcula o novo valor antes de salvar
+                        $novoOculto = ! (bool) $record->oculto;
+
+                        $record->update(['oculto' => $novoOculto]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title($novoOculto ? 'Plano ocultado.' : 'Plano exibido.')
+                            ->success()
+                            ->send();
+
+                        // forÃ§a o re-render da tabela
+                        $action->getLivewire()->dispatch('refresh');
+                    }),
+
+                EditAction::make()
+                    ->label('Editar')
+                    ->tooltip('Editar plano'),
+
+                DeleteAction::make()
+                    ->label('Excluir')
+                    ->disabled(fn ($record) => $record->clientes()->exists())
+                    ->tooltip('SÃ³ Ã© possÃ­vel excluir planos sem clientes'),
+            ])
+            ->headerActions([
+                \Filament\Actions\CreateAction::make('novo')
+                    ->label('Novo plano')
+                    ->icon('heroicon-o-plus')
+                    ->color('success'),
+
+                ExportAction::make('exportar')
+                    ->label('Exportar')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->exports([
+                        ExcelExport::make('Planos')
+                            ->fromTable()
+                            ->withColumns([
+                                ExcelColumn::make('nome')->heading('Nome'),
+                                ExcelColumn::make('periodicidade')->heading('Periodicidade')->formatStateUsing(fn ($s) => self::periodLabel($s) ?? 'â€”'),
+                                ExcelColumn::make('valor')->heading('Valor')->formatStateUsing(fn ($v) => self::money($v)),
+                                ExcelColumn::make('taxa_adesao')->heading('Taxa AdesÃ£o')->formatStateUsing(fn ($v) => self::money($v)),
+                                ExcelColumn::make('trial_dias')->heading('Trial (dias)'),
+                                ExcelColumn::make('status')->heading('Status')->formatStateUsing(fn ($s) => self::normalizedStatus($s)),
+                                ExcelColumn::make('oculto')->heading('Oculto')->formatStateUsing(fn ($v) => self::truthy($v) ? 'Sim' : 'NÃ£o'),
+                                ExcelColumn::make('descricao')->heading('DescriÃ§Ã£o'),
+                                ExcelColumn::make('recursos')->heading('Recursos')->formatStateUsing(fn ($v) => is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v),
+                                ExcelColumn::make('limites')->heading('Limites')->formatStateUsing(fn ($v) => is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v),
+                            ])
+                            ->withFilename('planos-' . now()->format('d-m-Y'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+            ])
+            ->bulkActions([
+                ExportBulkAction::make('exportarBulk')
+                    ->label('Exportar')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->exports([
+                        ExcelExport::make('Planos selecionados')
+                            ->fromTable()
+                            ->withColumns([
+                                ExcelColumn::make('nome')->heading('Nome'),
+                                ExcelColumn::make('periodicidade')->heading('Periodicidade')->formatStateUsing(fn ($s) => self::periodLabel($s) ?? 'â€”'),
+                                ExcelColumn::make('valor')->heading('Valor')->formatStateUsing(fn ($v) => self::money($v)),
+                                ExcelColumn::make('taxa_adesao')->heading('Taxa AdesÃ£o')->formatStateUsing(fn ($v) => self::money($v)),
+                                ExcelColumn::make('trial_dias')->heading('Trial (dias)'),
+                                ExcelColumn::make('status')->heading('Status')->formatStateUsing(fn ($s) => self::normalizedStatus($s)),
+                                ExcelColumn::make('oculto')->heading('Oculto')->formatStateUsing(fn ($v) => self::truthy($v) ? 'Sim' : 'NÃ£o'),
+                                ExcelColumn::make('descricao')->heading('DescriÃ§Ã£o'),
+                                ExcelColumn::make('recursos')->heading('Recursos')->formatStateUsing(fn ($v) => is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v),
+                                ExcelColumn::make('limites')->heading('Limites')->formatStateUsing(fn ($v) => is_array($v) ? json_encode($v, JSON_UNESCAPED_UNICODE) : $v),
+                            ])
+                            ->withFilename('planos-' . now()->format('d-m-Y'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+
+                BulkActionGroup::make([
+                    BulkAction::make('duplicar')
+                        ->label('Duplicar')
+                        ->icon('heroicon-o-document-duplicate')
+                        ->requiresConfirmation()
+                        ->deselectRecordsAfterCompletion()
+                        ->action(function (Collection $records) {
+                            $nextOrder = (int) (Plano::max('ordem') ?? 0);
+                            $created = 0;
+
+                            foreach ($records as $record) {
+                                /** @var \App\Models\Plano $record */
+                                $copy = $record->replicate([
+                                    'slug', 'ordem', 'created_at', 'updated_at', 'deleted_at',
+                                ]);
+
+                                $copy->nome  = self::nextCopyName($record->nome);
+                                $copy->slug  = null;
+                                $copy->ordem = ++$nextOrder;
+                                unset($copy->clientes_count);
+
+                                $copy->save();
+                                $created++;
+                            }
+
+                            Notification::make()
+                                ->title($created > 1 ? "{$created} planos duplicados com sucesso!" : "Plano duplicado com sucesso!")
+                                ->success()
+                                ->send();
+                        }),
+
+                    DeleteBulkAction::make()
+                        ->disabled(fn (Collection $records) =>
+                            $records->first(fn ($r) => $r->clientes()->exists()) !== null
+                        )
+                        ->tooltip('SÃ³ Ã© possÃ­vel excluir planos sem clientes'),
+                ]),
+
+                    BulkAction::make('ativarEmMassa')
+                        ->label('Ativar')
+                        ->icon('heroicon-o-power')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $ok = 0;
+                            foreach ($records as $p) {
+                                if (! $p->is_active) {
+                                    $p->update(['status' => PlanStatus::ATIVO]);
+                                    $ok++;
+                                }
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title($ok ? "{$ok} plano(s) ativado(s)." : 'Nenhum plano precisou ser ativado.')
+                                ->success()->send();
+                        }),
+
+                    BulkAction::make('inativarEmMassa')
+                        ->label('Inativar')
+                        ->icon('heroicon-o-power')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $ok = 0;
+                            foreach ($records as $p) {
+                                if ($p->is_active) {
+                                    $p->update(['status' => PlanStatus::INATIVO]);
+                                    $ok++;
+                                }
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title($ok ? "{$ok} plano(s) inativado(s)." : 'Nenhum plano precisou ser inativado.')
+                                ->success()->send();
+                        }),
+
+                    BulkAction::make('ocultarEmMassa')
+                        ->label('Ocultar')
+                        ->icon('heroicon-o-eye-slash')
+                        ->color('warning')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $ok = 0;
+                            foreach ($records as $p) {
+                                if (! $p->oculto) {
+                                    $p->update(['oculto' => true]);
+                                    $ok++;
+                                }
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title($ok ? "{$ok} plano(s) ocultado(s)." : 'Nada a ocultar.')
+                                ->success()->send();
+                        }),
+
+                    BulkAction::make('exibirEmMassa')
+                        ->label('Exibir')
+                        ->icon('heroicon-o-eye')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            $ok = 0;
+                            foreach ($records as $p) {
+                                if ($p->oculto) {
+                                    $p->update(['oculto' => false]);
+                                    $ok++;
+                                }
+                            }
+                            \Filament\Notifications\Notification::make()
+                                ->title($ok ? "{$ok} plano(s) exibido(s)." : 'Nada a exibir.')
+                                ->success()->send();
+                        }),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Planos\PlanoResource.php ===
+<?php
+
+namespace App\Filament\Resources\Planos;
+
+use App\Filament\Resources\Planos\Pages\CreatePlano;
+use App\Filament\Resources\Planos\Pages\EditPlano;
+use App\Filament\Resources\Planos\Pages\ListPlanos;
+use App\Filament\Resources\Planos\Schemas\PlanoForm;
+use App\Filament\Resources\Planos\Tables\PlanosTable;
+use App\Models\Plano;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+
+class PlanoResource extends Resource
+{
+    protected static ?string $model = Plano::class;
+
+    protected static string|\BackedEnum|null $navigationIcon   = 'heroicon-o-banknotes';
+    protected static string|\UnitEnum|null   $navigationGroup  = 'Faturamento';
+    protected static ?string $navigationLabel  = 'Planos';
+    protected static ?string $modelLabel       = 'Plano';
+    protected static ?string $pluralModelLabel = 'Planos';
+    protected static ?int    $navigationSort   = 10;
+
+    public static function form(Schema $schema): Schema
+    {
+        return PlanoForm::make($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return PlanosTable::make($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => ListPlanos::route('/'),
+            'create' => CreatePlano::route('/create'),
+            'edit'   => EditPlano::route('/{record}/edit'),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\CreateUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateUsuario extends CreateRecord
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'UsuÃ¡rio criado com sucesso!';
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\EditUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\EditRecord;
+
+class EditUsuario extends EditRecord
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'UsuÃ¡rio atualizado!';
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\ListUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\ListRecords;
+
+class ListUsuarios extends ListRecords
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            \Filament\Actions\CreateAction::make()
+                ->label('Novo usuÃ¡rio')
+                ->icon('heroicon-o-plus')
+                ->color('success'),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Schemas\UsuariosForm.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Schemas;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema as LaravelSchema;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules\Unique;
+
+class UsuarioForm
+{
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Dados do usuÃ¡rio')
+                    ->columns(12)
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
+                                return $rule;
+                            })
+                            ->columnSpan(6),
+
+                        // senha sÃ³ grava se preenchida (nÃ£o sobrescreve vazio no edit)
+                        Forms\Components\TextInput::make('password')
+                            ->label('Senha')
+                            ->password()
+                            ->revealable()
+                                ->rule(Password::default())
+                                ->validationMessages([
+                                    'min' => 'A senha deve ter no mÃ­nimo :min caracteres.',
+                                    'required' => 'Informe uma senha.',
+                                    'confirmed' => 'A confirmaÃ§Ã£o da senha nÃ£o confere.',
+                                ])
+                            ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->label('Confirmar senha')
+                            ->password()
+                            ->revealable()
+                            ->same('password')
+                            ->dehydrated(false)
+                            ->columnSpan(6),
+
+                        // Campo opcional (sÃ³ use se tiver adicionado a coluna na migraÃ§Ã£o abaixo)
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Ativo')
+                            ->visible(fn () => LaravelSchema::hasColumn('users', 'is_active'))
+                            ->columnSpan(3),
+
+                        Forms\Components\DateTimePicker::make('email_verified_at')
+                            ->label('Verificado em')
+                            ->helperText('Defina para marcar e-mail como verificado.')
+                            ->nullable()
+                            ->columnSpan(3),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Tables\UsuariosTable.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Tables;
+
+use App\Models\User;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Filament\Actions\DeleteBulkAction;
+
+class UsuariosTable
+{
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('email')
+                    ->label('E-mail')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('email_verified_at')
+                    ->label('Verificado')
+                    ->state(fn ($r) => $r?->email_verified_at ? 'Sim' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn ($r) => $r?->email_verified_at ? 'success' : 'gray')
+                    ->alignCenter(),
+
+                // SÃ³ exibe se a coluna existir
+                ...(
+                    Schema::hasColumn('users', 'is_active')
+                        ? [
+                            TextColumn::make('is_active')
+                                ->label('Ativo')
+                                ->state(fn ($r) => $r?->is_active ? 'Sim' : 'NÃ£o')
+                                ->badge()
+                                ->color(fn ($r) => $r?->is_active ? 'success' : 'danger')
+                                ->alignCenter(),
+                        ]
+                        : []
+                ),
+
+                TextColumn::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                TernaryFilter::make('email_verified_at')
+                    ->label('Verificado')
+                    ->nullable(),
+
+                // SÃ³ exibe se a coluna existir
+                ...(
+                    Schema::hasColumn('users', 'is_active')
+                        ? [
+                            TernaryFilter::make('is_active')
+                                ->label('Ativo')
+                                ->nullable(),
+                        ]
+                        : []
+                ),
+            ])
+            ->actions([
+                Action::make('resetPassword')
+                    ->label('Resetar senha')
+                    ->icon('heroicon-o-key')
+                    ->requiresConfirmation()
+                    ->action(function (User $record) {
+                        $new = Str::random(10);
+                        $record->forceFill(['password' => Hash::make($new)])->save();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Nova senha gerada')
+                            ->body("Anote a senha temporÃ¡ria: **{$new}**")
+                            ->success()
+                            ->seconds(12)
+                            ->send();
+                    }),
+
+                EditAction::make()
+                    ->label('Editar'),
+
+                Action::make('delete')
+                    ->label('Excluir')
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->action(fn (User $r) => $r->delete())
+                    ->visible(fn ($r) => $r && $r instanceof User && $r->getKey() !== auth()->id())
+                    ->tooltip('NÃ£o Ã© possÃ­vel excluir a si mesmo'),
+            ])
+            ->bulkActions([
+                DeleteBulkAction::make()
+                    ->label('Excluir selecionados')
+                    ->deselectRecordsAfterCompletion(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\UsuariosResource.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios;
+
+use App\Filament\Resources\Usuarios\Pages\CreateUsuario;
+use App\Filament\Resources\Usuarios\Pages\EditUsuario;
+use App\Filament\Resources\Usuarios\Pages\ListUsuarios;
+use App\Filament\Resources\Usuarios\Schemas\UsuarioForm;
+use App\Filament\Resources\Usuarios\Tables\UsuariosTable;
+use App\Models\User;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Filament\Support\Icons\Heroicon;
+
+class UsuariosResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static string|\UnitEnum|null $navigationGroup  = 'AdministraÃ§Ã£o';
+    protected static ?string $navigationLabel  = 'UsuÃ¡rios';
+    protected static ?string $modelLabel       = 'UsuÃ¡rio';
+    protected static ?string $pluralModelLabel = 'UsuÃ¡rios';
+    protected static ?int    $navigationSort   = 1;
+
+    // **mostra o menu sÃ³ para quem pode ver**
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \Illuminate\Support\Facades\Gate::allows('viewAny', User::class);
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return UsuarioForm::make($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsuariosTable::make($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => ListUsuarios::route('/'),
+            'create' => CreateUsuario::route('/create'),
+            'edit'   => EditUsuario::route('/{record}/edit'),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Http\Controllers\Controller.php ===
+<?php
+
+namespace App\Http\Controllers;
+
+abstract class Controller
+{
+    //
+}
+
+=== C:\Users\limao\marokah\app\Models\Assinatura.php ===
+<?php
+
+namespace App\Models;
+
+use App\Enums\SubscriptionStatus;
+use App\Enums\PlanPeriod;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Assinatura extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'empresa_id','plano_id','status','periodicidade','valor',
+        'trial_ends_at','started_at','dia_vencimento','next_billing_at','canceled_at','obs',
+    ];
+
+    protected $casts = [
+        'status'          => SubscriptionStatus::class,
+        'valor'           => 'decimal:2',
+        'trial_ends_at'   => 'datetime',
+        'started_at'      => 'date',
+        'next_billing_at' => 'date',
+        'canceled_at'     => 'datetime',
+        'dia_vencimento'  => 'integer',
+    ];
+
+    public function cliente() { return $this->belongsTo(Cliente::class); }
+    public function plano()   { return $this->belongsTo(Plano::class);   }
+    public function faturas() { return $this->hasMany(Fatura::class);    }
+
+    public function getIsActiveAttribute(): bool
+    {
+        return $this->status === SubscriptionStatus::ATIVA;
+    }
+
+    public function valorEfetivo(): float
+    {
+        return (float) ($this->valor ?? $this->plano?->valor ?? 0);
+    }
+
+    public function empresa()
+    {
+        // se sua tabela de clientes Ã© "clientes", mantendo o Model Cliente
+        return $this->belongsTo(\App\Models\Cliente::class, 'empresa_id');
+    }
+
+    public function nextDueDate(?\Carbon\Carbon $ref = null): ?\Carbon\Carbon
+    {
+        $ref = ($ref ?? now())->startOfDay();
+
+        // dia definido na assinatura ou dia do started_at (fallback)
+        $start = $this->started_at ? \Carbon\Carbon::parse($this->started_at) : null;
+        $day   = (int)($this->dia_vencimento ?: ($start? $start->day : 1));
+
+        // calcula o prÃ³ximo vencimento baseado no dia do mÃªs
+        $d = $ref->copy()->day(min($day, $ref->daysInMonth));
+        if ($d->lt($ref)) {
+            $refNext = $ref->copy()->addMonth();
+            $d = $refNext->copy()->day(min($day, $refNext->daysInMonth));
+        }
+        return $d;
+    }
+
+    public function getProximoVencimentoAttribute(): ?string
+    {
+        return optional($this->nextDueDate())->toDateString();
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $a) {
+            if ($a->isDirty(['started_at','dia_vencimento']) || blank($a->next_billing_at)) {
+                $a->next_billing_at = optional($a->nextDueDate())->toDateString();
+            }
+        });
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\Cep.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Cep extends Model
+{
+    protected $table = 'cep'; // tabela criada pelo plugin
+    protected $fillable = ['cep', 'state', 'city', 'neighborhood', 'street'];
+    public $timestamps = true;
+}
+
+=== C:\Users\limao\marokah\app\Models\Cliente.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Cliente extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    /** Tabela fÃ­sica (mantemos a existente). */
+    protected $table = 'empresas';
+
+    /** Campos liberados para mass assignment. */
+    protected $fillable = [
+        // ðŸ‘‡ IMPORTANTE: incluir 'nome' porque a coluna Ã© NOT NULL
+        'nome',
+
+        // IdentificaÃ§Ã£o / uso do sistema
+        'contrato', 'status', 'dia_vencimento', 'observacoes', 'perfil', 'plano_id',
+
+        // Tipo e documentos
+        'tipo_pessoa', 'cpf_cnpj', 'razao_social', 'nome_fantasia',
+        'ie', 'ie_isento',
+
+        // Contato comercial
+        'email_comercial', 'telefone_comercial', 'celular_comercial', 'whatsapp_comercial',
+
+        // Representante e financeiro
+        'representante_nome', 'representante_cpf', 'representante_email', 'representante_celular',
+        'financeiro_diferente', 'financeiro_nome', 'financeiro_celular', 'financeiro_email',
+
+        // EndereÃ§o da empresa (matriz)
+        'empresa_cep', 'empresa_endereco', 'empresa_numero', 'empresa_complemento',
+        'empresa_referencia', 'empresa_bairro', 'empresa_cidade', 'empresa_uf',
+
+        // EndereÃ§o de cobranÃ§a
+        'cobranca_cep', 'cobranca_endereco', 'cobranca_numero', 'cobranca_complemento',
+        'cobranca_referencia', 'cobranca_bairro', 'cobranca_cidade', 'cobranca_uf',
+    ];
+
+    protected $casts = [
+        'ie_isento'            => 'bool',
+        'financeiro_diferente' => 'bool',
+        'dia_vencimento'       => 'integer',
+        'created_at'           => 'datetime',
+        'updated_at'           => 'datetime',
+    ];
+
+    /* -------------------------- NormalizaÃ§Ãµes -------------------------- */
+
+    /** Guarda o CPF/CNPJ sÃ³ com dÃ­gitos. */
+    protected function cpfCnpj(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? preg_replace('/\D+/', '', $value) : null,
+        );
+    }
+
+    /** Guarda o CPF do representante sÃ³ com dÃ­gitos. */
+    protected function representanteCpf(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => $value ? preg_replace('/\D+/', '', $value) : null,
+        );
+    }
+
+    public static function nextContract(): string
+    {
+        $nextId = (int) (self::max('id') ?? 0) + 1;
+        return str_pad((string) $nextId, 6, '0', STR_PAD_LEFT);
+    }
+    /* ------------------------------ Hooks ------------------------------ */
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $m) {
+            $m->cpf_cnpj = $m->cpf_cnpj ? preg_replace('/\D+/', '', $m->cpf_cnpj) : null;
+
+            if (blank($m->status)) {
+                $m->status = 'ATIVADO';
+            }
+
+            // garante 'nome' para NOT NULL
+            if (blank($m->nome)) {
+                $m->nome = $m->razao_social ?: $m->nome_fantasia;
+            }
+        });
+
+        static::creating(function (self $m) {
+            // gera contrato se nÃ£o vier do form
+            if (blank($m->contrato)) {
+                $m->contrato = self::nextContract(); // 000001, 000002, ...
+            }
+        });
+    }
+
+    /* --------------------------- Acessores ----------------------------- */
+
+    /** CPF/CNPJ formatado para exibiÃ§Ã£o. */
+    public function getCpfCnpjFormatadoAttribute(): ?string
+    {
+        $v = $this->cpf_cnpj;
+        if (!$v) return null;
+
+        if (strlen($v) === 11) {
+            return vsprintf('%s%s%s.%s%s%s.%s%s%s-%s%s', str_split($v));
+        }
+
+        if (strlen($v) === 14) {
+            return substr($v,0,2).'.'.substr($v,2,3).'.'.substr($v,5,3).'/'.substr($v,8,4).'-'.substr($v,12,2);
+        }
+
+        return $v;
+    }
+
+    /* ----------------------------- Scopes ------------------------------ */
+
+    public function scopeAtivos($query)
+    {
+        return $query->where('status', 'ATIVADO');
+    }
+
+    public function scopeBusca($query, ?string $termo)
+    {
+        if (!$termo) return $query;
+
+        $digitos = preg_replace('/\D+/', '', $termo);
+
+        return $query->where(function ($q) use ($termo, $digitos) {
+            $q->where('razao_social', 'like', "%{$termo}%")
+              ->orWhere('nome_fantasia', 'like', "%{$termo}%")
+              ->orWhere('contrato', 'like', "%{$termo}%")
+              ->orWhere('cpf_cnpj', 'like', "%{$digitos}%");
+        });
+    }
+
+    /* --------------------------- Relacionamentos --------------------------- */
+
+    public function enderecos(): HasMany
+    {
+        // FK usada nas migrations/Model de endereÃ§o
+        return $this->hasMany(\App\Models\Endereco::class, 'empresa_id');
+    }
+
+    public function pessoas(): HasMany
+    {
+        return $this->hasMany(\App\Models\Pessoa::class, 'empresa_id');
+    }
+    public function contabilidades()
+    {
+        return $this->hasMany(\App\Models\Contabilidade::class, 'empresa_id');
+    }
+
+    public function plano()
+    {
+    return $this->belongsTo(\App\Models\Plano::class, 'plano_id');
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\ConfiguracaoEmail.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ConfiguracaoEmail extends Model
+{
+    protected $table = 'configuracoes_email';
+
+    protected $fillable = [
+        'ativo', 'driver',
+        'host', 'porta', 'criptografia',
+        'usuario', 'senha',
+        'from_nome', 'from_email',
+        'dev_modo', 'dev_redirecionar_para',
+    ];
+
+    protected $casts = [
+        'ativo'      => 'boolean',
+        'porta'      => 'integer',
+        'dev_modo'   => 'boolean',
+        // protege a senha em repouso (AES-256)
+        'senha'      => 'encrypted',
+    ];
+
+    /**
+     * Garante um registro Ãºnico (singleton).
+     */
+    public static function unico(): self
+    {
+        return static::query()->firstOrCreate([], [
+            'driver' => 'smtp',
+            'porta'  => 587,
+            'criptografia' => 'tls',
+        ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\Contabilidade.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Contabilidade extends Model
+{
+    use SoftDeletes;
+    
+    protected $table = 'contabilidades';
+
+    protected $fillable = [
+        'empresa_id',
+        'razao_social',
+        'cnpj',
+        'nome_contato',
+        'email',
+        'telefone',
+        'principal',
+        'observacoes',
+        'user_id',
+    ];
+
+    protected $casts = [
+        'principal' => 'bool',
+    ];
+
+    // --- setters: guardam apenas dÃ­gitos
+    protected function cnpj(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($v) => $v ? preg_replace('/\D+/', '', (string) $v) : null
+        );
+    }
+
+    protected function telefone(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($v) => $v ? preg_replace('/\D+/', '', (string) $v) : null
+        );
+    }
+
+    // --- getters â€œformatadosâ€ para exibiÃ§Ã£o
+    public function getCnpjFormatadoAttribute(): ?string
+    {
+        $v = preg_replace('/\D+/', '', (string) $this->cnpj);
+        if (strlen($v) !== 14) return null;
+        return preg_replace('/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/', '$1.$2.$3/$4-$5', $v);
+    }
+
+    public function getTelefoneFormatadoAttribute(): ?string
+    {
+        $v = preg_replace('/\D+/', '', (string) $this->telefone);
+        if ($v === '') return null;
+
+        return match (strlen($v)) {
+            11 => preg_replace('/(\d{2})(\d{5})(\d{4})/', '($1) $2-$3', $v), // celular
+            10 => preg_replace('/(\d{2})(\d{4})(\d{4})/', '($1) $2-$3', $v), // fixo
+            default => null,
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\Empresa.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Empresa extends Model
+{
+    protected $table = 'empresas'; // ajuste se o nome da tabela for diferente
+
+    protected $fillable = [
+        'nome',
+        'cnpj',
+        'endereco',
+        'telefone',
+        // adicione outros campos conforme necessÃ¡rio
+    ];
+
+    // Adicione relacionamentos ou casts se o resource precisar
+}
+
+=== C:\Users\limao\marokah\app\Models\Endereco.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Endereco extends Model
+{
+    use SoftDeletes;
+    
+    protected $fillable = [
+        'empresa_id','tipo','rotulo','cep','rua','numero','complemento',
+        'referencia','bairro','cidade','uf','padrao',
+    ];
+
+    protected $casts = ['padrao' => 'bool'];
+
+    protected static function booted(): void
+    {
+        static::saving(function (self $e) {
+            $e->cep = $e->cep ? preg_replace('/\D+/', '', $e->cep) : null;
+            $e->uf  = $e->uf ? strtoupper($e->uf) : null;
+        });
+
+        static::saved(function (self $e) {
+            if ($e->padrao) {
+                static::where('empresa_id', $e->empresa_id)
+                    ->where('id', '!=', $e->id)
+                    ->update(['padrao' => false]);
+            }
+        });
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(\App\Models\Cliente::class, 'empresa_id');
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\Fatura.php ===
+<?php
+
+namespace App\Models;
+
+use App\Enums\InvoiceStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Fatura extends Model
+{
+    use SoftDeletes;
+
+    protected $fillable = [
+        'empresa_id','assinatura_id','status','referencia_ini','referencia_fim',
+        'emissao','vencimento','subtotal','descontos','acrescimos','total','paid_at',
+        'descricao',
+    ];
+
+    protected $casts = [
+        'status'         => InvoiceStatus::class,
+        'referencia_ini' => 'date',
+        'referencia_fim' => 'date',
+        'emissao'        => 'date',
+        'vencimento'     => 'date',
+        'paid_at'        => 'datetime',
+        'subtotal'       => 'decimal:2',
+        'descontos'      => 'decimal:2',
+        'acrescimos'     => 'decimal:2',
+        'total'          => 'decimal:2',
+    ];
+
+    public function cliente()     { return $this->belongsTo(Cliente::class); }
+    public function assinatura()  { return $this->belongsTo(Assinatura::class); }
+    public function itens()       { return $this->hasMany(FaturaItem::class); }
+    public function pagamentos()  { return $this->hasMany(Pagamento::class); }
+
+    public function recalcularTotais(): void
+    {
+        $subtotal = $this->itens()->sum('total');
+        $this->subtotal = $subtotal;
+        $this->total = $subtotal - (float)$this->descontos + (float)$this->acrescimos;
+    }
+    
+    public function empresa()
+    {
+        // se sua tabela de clientes Ã© "clientes", mantendo o Model Cliente
+        return $this->belongsTo(\App\Models\Cliente::class, 'empresa_id');
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $f) {
+            $f->status   ??= \App\Enums\InvoiceStatus::ABERTA;
+            $f->emissao  ??= now()->toDateString();
+            // se vier assinatura e nÃ£o vier vencimento, calcula pela assinatura:
+            if (!$f->vencimento && $f->assinatura_id) {
+                $a = \App\Models\Assinatura::find($f->assinatura_id);
+                $f->vencimento = optional($a?->nextDueDate())->toDateString();
+            }
+        });
+
+        static::saving(function (self $f) {
+            // seguranÃ§a: total coerente com os campos
+            $f->total = (float)$f->subtotal - (float)$f->descontos + (float)$f->acrescimos;
+        });
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\FaturaItem.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class FaturaItem extends Model
+{
+    protected $fillable = [
+        'fatura_id','tipo','descricao','qtd','unitario','total','metadata',
+    ];
+
+    protected $casts = [
+        'qtd'      => 'integer',
+        'unitario' => 'decimal:2',
+        'total'    => 'decimal:2',
+        'metadata' => 'array',
+    ];
+
+    public function fatura() { return $this->belongsTo(Fatura::class); }
+}
+
+=== C:\Users\limao\marokah\app\Models\Pagamento.php ===
+<?php
+
+namespace App\Models;
+
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
+use Illuminate\Database\Eloquent\Model;
+
+class Pagamento extends Model
+{
+    protected $fillable = [
+        'fatura_id','metodo','status','valor','paid_at','gateway_ref','notes',
+    ];
+
+    protected $casts = [
+        'metodo'  => PaymentMethod::class,
+        'status'  => PaymentStatus::class,
+        'valor'   => 'decimal:2',
+        'paid_at' => 'datetime',
+    ];
+
+    public function fatura() { return $this->belongsTo(Fatura::class); }
+}
+
+=== C:\Users\limao\marokah\app\Models\Pessoa.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Pessoa extends Model
+{
+    use SoftDeletes;
+    
+    protected $fillable = [
+        'empresa_id', 'tipo', 'nome', 'cargo', 'cpf', 'email',
+        'telefone', 'celular', 'observacoes', 'principal',
+    ];
+
+    protected $casts = [
+        'principal' => 'bool',
+    ];
+
+    protected static function booted(): void
+    {
+        // Normaliza CPF, opcional
+        static::saving(function (self $p) {
+            $p->cpf = $p->cpf ? preg_replace('/\D+/', '', $p->cpf) : null;
+        });
+
+        // Se esta pessoa for marcada como principal, desmarca as outras
+        static::saved(function (self $p) {
+            if ($p->principal) {
+                static::where('empresa_id', $p->empresa_id)
+                    ->where('id', '!=', $p->id)
+                    ->update(['principal' => false]);
+            }
+        });
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(\App\Models\Cliente::class, 'empresa_id');
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\Plano.php ===
+<?php
+
+namespace App\Models;
+
+use App\Enums\PlanPeriod;
+use App\Enums\PlanStatus;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Str;
+
+class Plano extends Model
+{
+    use HasFactory, SoftDeletes;
+
+    protected $fillable = [
+        'nome', 'slug', 'periodicidade', 'valor', 'taxa_adesao',
+        'trial_dias', 'status', 'descricao', 'recursos', 'limites',
+        'ordem', 'oculto',
+    ];
+
+    protected $casts = [
+        'valor'         => 'decimal:2',
+        'taxa_adesao'   => 'decimal:2',
+        'trial_dias'    => 'integer',
+        'oculto'        => 'boolean',
+        'recursos'      => 'array',   // KeyValue
+        'limites'       => 'array',   // KeyValue
+        'periodicidade' => PlanPeriod::class,
+        'status'        => PlanStatus::class, // ðŸ‘ˆ agora Ã© enum
+    ];
+
+    // slug automÃ¡tico a partir do nome
+    protected function slug(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($v, array $a) => $v ?: Str::slug((string)($a['nome'] ?? ''))
+        );
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $p) {
+            if (is_null($p->ordem)) {
+                $p->ordem = (int) (self::max('ordem') ?? 0) + 1;
+            }
+        });
+
+        static::saving(function (self $p) {
+            // Status sempre coerced e com default ATIVO
+            $p->status = PlanStatus::coerce($p->status ?? PlanStatus::ATIVO);
+
+            // Periodicidade sempre em maiÃºsculo (valor do enum)
+            $period = $p->periodicidade;
+            if ($period instanceof PlanPeriod) {
+                $period = $period->value;
+            }
+            $p->periodicidade = strtoupper($period ?: 'MENSAL');
+        });
+
+        // (opcional) bloquear exclusÃ£o com clientes
+        static::deleting(function (self $p) {
+            if ($p->clientes()->exists()) {
+                throw new \DomainException('NÃ£o Ã© possÃ­vel excluir planos com clientes vinculados.');
+            }
+        });
+    }
+
+    /** Label legÃ­vel da periodicidade (para views/exports) */
+    protected function periodicidadeLabel(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value, array $attrs) => match (strtoupper($attrs['periodicidade'] ?? '')) {
+                'MENSAL' => 'Mensal',
+                'TRIMESTRAL' => 'Trimestral',
+                'SEMESTRAL' => 'Semestral',
+                'ANUAL' => 'Anual',
+                default => 'â€”',
+            },
+        );
+    }
+
+    /** Helpers / accessors */
+    public function getIsActiveAttribute(): bool
+    {
+        return ($this->status instanceof PlanStatus)
+            ? $this->status === PlanStatus::ATIVO
+            : mb_strtoupper((string) $this->status) === 'ATIVO';
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return ($this->status instanceof PlanStatus)
+            ? $this->status->label()
+            : (mb_strtoupper((string) $this->status) === 'ATIVO' ? 'ATIVO' : 'INATIVO');
+    }
+
+    /** RelaÃ§Ãµes */
+    public function clientes()
+    {
+        return $this->hasMany(\App\Models\Cliente::class, 'plano_id');
+    }
+
+    /** Scopes */
+    public function scopeAtivos($q)
+    {
+        return $q->where('status', PlanStatus::ATIVO);
+    }
+
+    public function scopePublicos($q)
+    {
+        return $q->where('oculto', false);
+    }
+
+    public function scopeMensais($q)
+    {
+        return $q->where('periodicidade', 'MENSAL'); // ðŸ‘ˆ corrigido
+    }
+}
+
+=== C:\Users\limao\marokah\app\Models\User.php ===
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Filament\Panel;
+use Spatie\Permission\Traits\HasRoles;
+use Filament\Models\Contracts\FilamentUser;
+
+
+class User extends Authenticatable implements FilamentUser
+{
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+    use HasRoles;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return match ($panel->getId()) {
+            'marokah' => $this->hasRole('superadmin'),
+
+            // Painel Ãºnico dos clientes
+            'app' => $this->hasAnyRole([
+                'tenant_admin',
+                'loja_admin','loja_operador',
+                'produtor_admin','produtor_operador',
+                'contabilidade_admin','contabilidade_operador',
+            ]),
+
+            default => false,
+        };
+    }
+}
+
+=== C:\Users\limao\marokah\app\Policies\ClientePolicy.php ===
+<?php
+
+namespace App\Policies;
+
+use App\Models\Cliente;
+use App\Models\User;
+
+class ClientePolicy
+{
+    public function before(User $user): ?bool
+    {
+        // Superadmin vÃª tudo
+        if ($user->hasRole('superadmin')) return true;
+        return null;
+    }
+
+    private function canManage(User $user): bool
+    {
+        // Ajuste estes papÃ©is conforme seu projeto
+        return method_exists($user, 'hasRole') &&
+            ($user->hasRole('marokah_admin') || $user->hasRole('marokah_staff'));
+    }
+
+    public function viewAny(User $user): bool   { return $this->canManage($user); }
+    public function view(User $user, Cliente $c): bool   { return $this->canManage($user); }
+    public function create(User $user): bool    { return $this->canManage($user); }
+    public function update(User $user, Cliente $c): bool { return $this->canManage($user); }
+    public function delete(User $user, Cliente $c): bool { return $this->canManage($user); }
+
+    // Se sua tabela tiver soft deletes:
+    public function restore(User $user, Cliente $c): bool     { return $this->canManage($user); }
+    public function forceDelete(User $user, Cliente $c): bool { return $this->canManage($user); }
+}
+
+=== C:\Users\limao\marokah\app\Policies\EmpresaPolicy.php ===
+<?php
+
+namespace App\Policies;
+
+use App\Models\Empresa;
+use App\Models\User;
+
+class EmpresaPolicy
+{
+    public function before(User $user): ?bool
+    {
+        // Superadmin vÃª tudo
+        if ($user->hasRole('superadmin')) return true;
+        return null;
+    }
+
+    public function viewAny(User $user): bool { return false; }
+    public function view(User $user, Empresa $empresa): bool { return false; }
+    public function create(User $user): bool { return false; }
+    public function update(User $user, Empresa $empresa): bool { return false; }
+    public function delete(User $user, Empresa $empresa): bool { return false; }
+}
+
+=== C:\Users\limao\marokah\app\Policies\PlanoPolicy.php ===
+<?php
+
+namespace App\Policies;
+
+use App\Models\Plano;
+use App\Models\User;
+
+class PlanoPolicy
+{
+    public function before(User $user): ?bool
+    {
+        // Superadmin vÃª tudo
+        if ($user->hasRole('superadmin')) return true;
+        return null;
+    }
+
+    private function canManage(User $user): bool
+    {
+        return method_exists($user, 'hasRole') &&
+            ($user->hasRole('marokah_admin') || $user->hasRole('marokah_staff'));
+    }
+
+    public function viewAny(User $user): bool         { return $this->canManage($user); }
+    public function view(User $user, Plano $p): bool  { return $this->canManage($user); }
+    public function create(User $user): bool          { return $this->canManage($user); }
+    public function update(User $user, Plano $p): bool{ return $this->canManage($user); }
+    public function delete(User $user, Plano $p): bool{ return $this->canManage($user); }
+
+    public function restore(User $user, Plano $p): bool     { return $this->canManage($user); }
+    public function forceDelete(User $user, Plano $p): bool { return $this->canManage($user); }
+}
+
+=== C:\Users\limao\marokah\app\Policies\UserPolicy.php ===
+<?php
+
+namespace App\Policies;
+
+use App\Models\User;
+
+class UserPolicy
+{
+    public function viewAny(User $user): bool
+    {
+        return (bool) $user->is_superadmin;
+    }
+
+    public function view(User $user, User $model): bool
+    {
+        return (bool) $user->is_superadmin;
+    }
+
+    public function create(User $user): bool
+    {
+        return (bool) $user->is_superadmin;
+    }
+
+    public function update(User $user, User $model): bool
+    {
+        return (bool) $user->is_superadmin;
+    }
+
+    public function delete(User $user, User $model): bool
+    {
+        // superadmin pode deletar, mas nunca a si mesmo
+        return (bool) $user->is_superadmin && $user->id !== $model->id;
+    }
+
+    public function deleteAny(User $user): bool
+    {
+        return (bool) $user->is_superadmin;
+    }
+}
+
+=== C:\Users\limao\marokah\app\Providers\Filament\PainelMarokahProvider.php ===
+<?php
+
+namespace App\Providers\Filament;
+
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Filament\Pages\Dashboard;
+use Filament\Panel;
+use Filament\PanelProvider;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use pxlrbt\FilamentSpotlight\SpotlightPlugin;
+
+class PainelMarokahProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id('marokah')                 // id do painel
+            ->path('marokah')               // URL base: /marokah
+            ->brandName('Marokah â€¢ Superadmin')
+            ->login()                       // telas de login padrÃ£o do Filament
+            ->colors([
+                'primary' => '#16a34a',     // verde
+            ])
+
+            ->viteTheme('resources/css/filament/marokah/theme.css')
+            ->plugins([ SpotlightPlugin::make() ])
+            
+            ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+            ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
+            ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\Filament\Clusters')
+            ->pages([
+                Dashboard::class,
+            ])
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+            ->widgets([
+                AccountWidget::class,
+                FilamentInfoWidget::class,
+            ])
+            ->middleware([
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
+            ])
+            ->navigationGroups([
+                'Plataforma',
+                'Clientes',
+                'Faturamento',
+                'UsuÃ¡rios',
+                'IntegraÃ§Ãµes',
+                'RelatÃ³rios',
+                'ConfiguraÃ§Ãµes',
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Providers\AppServiceProvider.php ===
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        //
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+
+=== C:\Users\limao\marokah\app\Providers\AuthServiceProvider.php ===
+<?php
+
+namespace App\Providers;
+
+use App\Models\User;
+use App\Models\Cliente;
+use App\Models\Plano;
+// use App\Models\Fatura;     // (adicione quando criar a policy)
+// use App\Models\Assinatura; // (adicione quando criar a policy)
+
+use App\Policies\UserPolicy;
+use App\Policies\ClientePolicy;
+use App\Policies\PlanoPolicy;
+// use App\Policies\FaturaPolicy;
+// use App\Policies\AssinaturaPolicy;
+
+use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+
+class AuthServiceProvider extends ServiceProvider
+{
+    protected $policies = [
+        User::class    => UserPolicy::class,
+        Cliente::class => ClientePolicy::class,
+        Plano::class   => PlanoPolicy::class,
+        // Fatura::class     => FaturaPolicy::class,
+        // Assinatura::class => AssinaturaPolicy::class,
+    ];
+
+    public function boot(): void
+    {
+        $this->registerPolicies();
+    }
+}
+
+=== C:\Users\limao\marokah\app\Providers\PainelAppProvider.php ===
+<?php
+
+namespace App\Providers;
+
+use Filament\Panel;
+use Filament\PanelProvider;
+
+// PÃ¡ginas & Widgets bÃ¡sicos
+use Filament\Pages\Dashboard;
+use Filament\Widgets\AccountWidget;
+use Filament\Widgets\FilamentInfoWidget;
+
+// Mesmos middlewares dos outros painÃ©is
+use Filament\Http\Middleware\Authenticate;
+use Filament\Http\Middleware\AuthenticateSession;
+use Filament\Http\Middleware\DisableBladeIconComponents;
+use Filament\Http\Middleware\DispatchServingFilamentEvent;
+use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
+use Illuminate\Cookie\Middleware\EncryptCookies;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
+use pxlrbt\FilamentSpotlight\SpotlightPlugin;
+
+class PainelAppProvider extends PanelProvider
+{
+    public function panel(Panel $panel): Panel
+    {
+        return $panel
+            ->id('app')
+            ->path('app')                            // /app (login: /app/login)
+            ->brandName('Marokah â€¢ App')
+            ->login()
+            ->colors(['primary' => '#16a34a'])
+            ->default()
+
+            ->viteTheme('resources/css/filament/app/theme.css')
+            ->plugins([ SpotlightPlugin::make() ])
+
+            // Descobrir resources/pages/widgets (padrÃ£o em PT-BR que vocÃª jÃ¡ usa)
+            ->discoverResources(in: app_path('Filament/Recursos'), for: 'App\\Filament\\Recursos')
+            ->discoverPages(in: app_path('Filament/Paginas'), for: 'App\\Filament\\Paginas')
+            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
+
+            // Dashboard bÃ¡sico
+            ->pages([Dashboard::class])
+            ->widgets([AccountWidget::class, FilamentInfoWidget::class])
+
+            // Middlewares Web + Filament (iguais aos demais)
+            ->middleware([
+                EncryptCookies::class,
+                AddQueuedCookiesToResponse::class,
+                StartSession::class,
+                AuthenticateSession::class,
+                ShareErrorsFromSession::class,
+                VerifyCsrfToken::class,
+                SubstituteBindings::class,
+                DisableBladeIconComponents::class,
+                DispatchServingFilamentEvent::class,
+            ])
+            ->authMiddleware([
+                Authenticate::class,
+            ])
+
+            // Grupos de navegaÃ§Ã£o do painel App
+            ->navigationGroups([
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Services\CepResolver.php ===
+<?php
+
+namespace App\Services;
+
+use App\Models\Cep;
+use Illuminate\Support\Facades\Http;
+
+class CepResolver
+{
+    /**
+     * Retorna ['cep','state','city','neighborhood','street'] ou null.
+     * - Normaliza para 8 dÃ­gitos
+     * - LÃª cache (tabela cep)
+     * - Se nÃ£o houver, consulta ViaCEP, grava e retorna
+     */
+    public function resolve(?string $rawCep): ?array
+    {
+        if (! $rawCep) return null;
+
+        $cep = preg_replace('/\D/', '', $rawCep);
+        if (strlen($cep) !== 8) return null;
+
+        if ($cached = Cep::where('cep', $cep)->first()) {
+            return $cached->only(['cep','state','city','neighborhood','street']);
+        }
+
+        $r = Http::timeout(6)->get("https://viacep.com.br/ws/{$cep}/json/");
+
+        if (! $r->ok() || $r->json('erro')) {
+            return null;
+        }
+
+        $data = [
+            'cep'          => $cep,
+            'state'        => $r->json('uf'),
+            'city'         => $r->json('localidade'),
+            'neighborhood' => $r->json('bairro'),
+            'street'       => $r->json('logradouro'),
+        ];
+
+        Cep::updateOrCreate(['cep' => $cep], $data);
+
+        return $data;
+    }
+}
+
+=== C:\Users\limao\marokah\app\Services\CnpjLookup.php ===
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+
+class CnpjLookup
+{
+    /**
+     * @return array{razao_social?:string,nome_fantasia?:string,cep?:string,logradouro?:string,bairro?:string,municipio?:string,uf?:string}|null
+     */
+    public function fetch(string $cnpj): ?array
+    {
+        $cnpj = preg_replace('/\D+/', '', $cnpj);
+        if (strlen($cnpj) !== 14) return null;
+
+        try {
+            $res = Http::timeout(6)->acceptJson()->get("https://brasilapi.com.br/api/cnpj/v1/{$cnpj}");
+            if (!$res->successful()) return null;
+
+            $data = $res->json();
+
+            return [
+                'razao_social'   => $data['razao_social']   ?? null,
+                'nome_fantasia'  => $data['nome_fantasia']  ?? null,
+                'cep'            => $data['cep']            ?? null,
+                'logradouro'     => $data['logradouro']     ?? null,
+                'bairro'         => $data['bairro']         ?? null,
+                'municipio'      => $data['municipio']      ?? null,
+                'uf'             => $data['uf']             ?? null,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+}
+
+=== C:\Users\limao\marokah\app\Services\services.txt ===
+
+=== C:\Users\limao\marokah\app\Services\CepResolver.php ===
+<?php
+
+namespace App\Services;
+
+use App\Models\Cep;
+use Illuminate\Support\Facades\Http;
+
+class CepResolver
+{
+    /**
+     * Retorna ['cep','state','city','neighborhood','street'] ou null.
+     * - Normaliza para 8 dÃ­gitos
+     * - LÃª cache (tabela cep)
+     * - Se nÃ£o houver, consulta ViaCEP, grava e retorna
+     */
+    public function resolve(?string $rawCep): ?array
+    {
+        if (! $rawCep) return null;
+
+        $cep = preg_replace('/\D/', '', $rawCep);
+        if (strlen($cep) !== 8) return null;
+
+        if ($cached = Cep::where('cep', $cep)->first()) {
+            return $cached->only(['cep','state','city','neighborhood','street']);
+        }
+
+        $r = Http::timeout(6)->get("https://viacep.com.br/ws/{$cep}/json/");
+
+        if (! $r->ok() || $r->json('erro')) {
+            return null;
+        }
+
+        $data = [
+            'cep'          => $cep,
+            'state'        => $r->json('uf'),
+            'city'         => $r->json('localidade'),
+            'neighborhood' => $r->json('bairro'),
+            'street'       => $r->json('logradouro'),
+        ];
+
+        Cep::updateOrCreate(['cep' => $cep], $data);
+
+        return $data;
+    }
+}
+
+=== C:\Users\limao\marokah\app\Services\CnpjLookup.php ===
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Http;
+
+class CnpjLookup
+{
+    /**
+     * @return array{razao_social?:string,nome_fantasia?:string,cep?:string,logradouro?:string,bairro?:string,municipio?:string,uf?:string}|null
+     */
+    public function fetch(string $cnpj): ?array
+    {
+        $cnpj = preg_replace('/\D+/', '', $cnpj);
+        if (strlen($cnpj) !== 14) return null;
+
+        try {
+            $res = Http::timeout(6)->acceptJson()->get("https://brasilapi.com.br/api/cnpj/v1/{$cnpj}");
+            if (!$res->successful()) return null;
+
+            $data = $res->json();
+
+            return [
+                'razao_social'   => $data['razao_social']   ?? null,
+                'nome_fantasia'  => $data['nome_fantasia']  ?? null,
+                'cep'            => $data['cep']            ?? null,
+                'logradouro'     => $data['logradouro']     ?? null,
+                'bairro'         => $data['bairro']         ?? null,
+                'municipio'      => $data['municipio']      ?? null,
+                'uf'             => $data['uf']             ?? null,
+            ];
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+}
+
+=== C:\Users\limao\marokah\app\Support\BrDocuments.php ===
+<?php
+
+namespace App\Support;
+
+final class BrDocuments
+{
+    public static function onlyDigits(?string $value): string
+    {
+        return preg_replace('/\D+/', '', (string) $value);
+    }
+
+    public static function cpf(?string $value): bool
+    {
+        $cpf = self::onlyDigits($value);
+        if (strlen($cpf) !== 11 || preg_match('/^(\\d)\\1{10}$/', $cpf)) return false;
+
+        for ($t = 9; $t < 11; $t++) {
+            $d = 0;
+            for ($c = 0; $c < $t; $c++) $d += $cpf[$c] * (($t + 1) - $c);
+            $d = ((10 * $d) % 11) % 10;
+            if ($cpf[$t] != $d) return false;
+        }
+        return true;
+    }
+
+    public static function cnpj(?string $value): bool
+    {
+        $cnpj = self::onlyDigits($value);
+
+        if (strlen($cnpj) !== 14 || preg_match('/^(\d)\1{13}$/', $cnpj)) {
+            return false;
+        }
+
+        $nums = array_map('intval', str_split($cnpj));
+
+        // 1Âº DV
+        $w1 = [5,4,3,2,9,8,7,6,5,4,3,2];
+        $s1 = 0;
+        for ($i = 0; $i < 12; $i++) $s1 += $nums[$i] * $w1[$i];
+        $d1 = ($s1 % 11) < 2 ? 0 : 11 - ($s1 % 11);
+
+        // 2Âº DV
+        $w2 = [6,5,4,3,2,9,8,7,6,5,4,3,2];
+        $s2 = 0;
+        for ($i = 0; $i < 13; $i++) $s2 += $nums[$i] * $w2[$i];
+        $d2 = ($s2 % 11) < 2 ? 0 : 11 - ($s2 % 11);
+
+        return $nums[12] === $d1 && $nums[13] === $d2;
+    }
+}

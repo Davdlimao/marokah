@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Pessoa extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = [
         'empresa_id', 'tipo', 'nome', 'cargo', 'cpf', 'email',
         'telefone', 'celular', 'observacoes', 'principal',

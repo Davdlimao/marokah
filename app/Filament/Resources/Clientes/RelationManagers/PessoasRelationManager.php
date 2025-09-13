@@ -17,6 +17,11 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Actions\Action;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
 
 /**
  * Gerencia a relação de pessoas vinculadas ao cliente/empresa.
@@ -205,6 +210,9 @@ class PessoasRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->filters([
+                    TrashedFilter::make(), // << filtro Lixeira
+                ])
             ->columns([
                 TextColumn::make('nome')->label('Nome')->searchable()->sortable(),
                 TextColumn::make('tipo')->label('Tipo')->badge()->sortable(),
@@ -248,6 +256,17 @@ class PessoasRelationManager extends RelationManager
             ->defaultSort('principal', 'desc')
             ->groupedBulkActions([
                 DeleteBulkAction::make()->label('Excluir selecionados'),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 }

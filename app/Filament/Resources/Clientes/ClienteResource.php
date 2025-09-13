@@ -8,6 +8,7 @@ use App\Filament\Resources\Clientes\Tables\ClientesTable;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class ClienteResource extends Resource
 {
@@ -102,4 +103,37 @@ class ClienteResource extends Resource
             'edit'   => Pages\EditCliente::route('/{record}/editar'),
         ];
     }
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return [
+            'razao_social',
+            'nome_fantasia',
+            'cpf_cnpj',
+            'email_comercial',
+            'telefone_comercial',
+            'celular_comercial',
+            'contrato',
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->razao_social ?: ($record->nome_fantasia ?: 'Cliente');
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        return array_filter([
+            'CPF/CNPJ' => $record->cpf_cnpj ?? null,
+            'Contrato' => $record->contrato ?? null,
+            'Status'   => $record->status ?? null,
+        ]);
+    }
+
+    public static function getGlobalSearchResultUrl(Model $record, ?string $panel = null): string
+    {
+        return static::getUrl('edit', ['record' => $record]);
+    }
+
 }

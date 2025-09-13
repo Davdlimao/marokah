@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cliente extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     /** Tabela física (mantemos a existente). */
     protected $table = 'empresas';
@@ -20,7 +21,7 @@ class Cliente extends Model
         'nome',
 
         // Identificação / uso do sistema
-        'contrato', 'status', 'dia_vencimento', 'observacoes', 'perfil',
+        'contrato', 'status', 'dia_vencimento', 'observacoes', 'perfil', 'plano_id',
 
         // Tipo e documentos
         'tipo_pessoa', 'cpf_cnpj', 'razao_social', 'nome_fantasia',
@@ -155,4 +156,8 @@ class Cliente extends Model
         return $this->hasMany(\App\Models\Contabilidade::class, 'empresa_id');
     }
 
+    public function plano()
+    {
+    return $this->belongsTo(\App\Models\Plano::class, 'plano_id');
+    }
 }

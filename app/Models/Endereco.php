@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Endereco extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = [
         'empresa_id','tipo','rotulo','cep','rua','numero','complemento',
         'referencia','bairro','cidade','uf','padrao',

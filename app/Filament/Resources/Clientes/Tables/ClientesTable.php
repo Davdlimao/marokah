@@ -8,18 +8,19 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column as ExcelColumn;
+use Maatwebsite\Excel\Excel;
 
-/**
- * Classe responsável por definir a tabela de clientes no painel Filament.
- */
 class ClientesTable
 {
-    /**
-     * Configura e retorna a instância da tabela de clientes.
-     *
-     * @param Table $table Instância da tabela Filament.
-     * @return Table Tabela configurada com colunas, ações e ações em massa.
-     */
     public static function make(Table $table): Table
     {
         return $table
@@ -31,15 +32,61 @@ class ClientesTable
                 TextColumn::make('status')->label('Status')->badge(),
                 TextColumn::make('created_at')->label('Criado em')->date('d/m/Y')->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([]) // Nenhum filtro definido para esta tabela
+            ->filters([
+                TrashedFilter::make(),
+            ])
+            ->headerActions([
+                ExportAction::make('exportar')
+                    ->label('Exportar')
+                    ->exports([
+                        ExcelExport::make('Clientes')
+                            ->fromTable()
+                            // Exclui alguma coluna que você não quer exportar:
+                            ->except(['cpf_cnpj']) 
+                            // Define colunas e cabeçalhos (ordem e labels ao seu gosto):
+                            ->withColumns([
+                                ExcelColumn::make('contrato')->heading('Contrato'),
+                                ExcelColumn::make('tipo_pessoa')->heading('Tipo'),
+                                ExcelColumn::make('razao_social')->heading('Cliente'),
+                                ExcelColumn::make('status')->heading('Status'),
+                                ExcelColumn::make('created_at')->heading('Criado em'),
+                            ])
+                            ->withFilename('empresas-clientes-' . now()->format('d-m-Y'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+            ])
             ->actions([
-                EditAction::make()->label('Editar'), // Ação para editar registros
-                DeleteAction::make()->label('Excluir'), // Ação para excluir registros
+                EditAction::make()->label('Editar'),
+                DeleteAction::make()->label('Excluir'),
             ])
             ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()->label('Excluir selecionados'), // Ação em massa para excluir múltiplos registros
-                ]),
+                ExportBulkAction::make()
+                    ->exports([
+                        ExcelExport::make('Clientes selecionados')
+                            ->fromTable()
+                            // Exporta só as colunas que você quer (alternativa ao ->except())
+                            ->only(['contrato','tipo_pessoa','razao_social','status','created_at'])
+                            ->withColumns([
+                                ExcelColumn::make('contrato')->heading('Contrato'),
+                                ExcelColumn::make('tipo_pessoa')->heading('Tipo'),
+                                ExcelColumn::make('razao_social')->heading('Cliente'),
+                                ExcelColumn::make('status')->heading('Status'),
+                                ExcelColumn::make('created_at')->heading('Criado em'),
+                            ])
+                            ->withFilename('clientes-selecionados-' . now()->format('Ymd-His'))
+                            ->withWriterType(Excel::XLSX),
+                    ]),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),
+                ForceDeleteAction::make(),
+                DeleteAction::make(),
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 }

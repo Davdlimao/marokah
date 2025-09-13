@@ -8,7 +8,6 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -18,6 +17,11 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Closure;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Tables\Filters\TrashedFilter;
 
 /**
  * RelationManager responsável por gerenciar as contabilidades relacionadas ao cliente.
@@ -139,6 +143,9 @@ class ContabilidadeRelationManager extends RelationManager
     public function table(Table $table): Table
     {
         return $table
+            ->filters([
+                    TrashedFilter::make(), // << filtro Lixeira
+                ])
             ->defaultSort('principal', 'desc')
             ->columns([
                 TextColumn::make('nome_contato')->label('Nome do responsável')->searchable()->sortable(),
@@ -182,6 +189,17 @@ class ContabilidadeRelationManager extends RelationManager
                 DeleteAction::make()->label('Excluir'),
             ])
             ->groupedBulkActions([
+                DeleteBulkAction::make(),
+            ])
+                        ->recordActions([
+                EditAction::make(),
+                RestoreAction::make(),                // << Restaurar
+                ForceDeleteAction::make(),            // << Excluir definitivamente
+                DeleteAction::make(),  // << Vai pra lixeira
+            ])
+            ->groupedBulkActions([
+                RestoreBulkAction::make(),
+                ForceDeleteBulkAction::make(),
                 DeleteBulkAction::make(),
             ]);
     }
