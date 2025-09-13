@@ -6,16 +6,21 @@ use Spatie\LaravelSettings\Settings;
 
 class EmailSettings extends Settings
 {
-    public string $driver = 'smtp';
-    public string $host = '';
-    public int $port = 587;
-    public ?string $username = null; // opcional
-    public ?string $password = null; // opcional
-    public bool $tls = true;
-    public ?string $from_address = null; // opcional
-    public ?string $from_name = null; // opcional
-    public ?string $reply_to = null; // novo campo opcional
-    public ?string $bcc = null; // novo campo opcional
+    // Fixo: usaremos SMTP apenas
+    public string  $driver        = 'smtp';
+
+    // Remetente
+    public ?string $from_address  = null;
+    public ?string $from_name     = null;
+    public ?string $reply_to      = null; // opcional
+    public ?string $bcc           = null; // opcional (separe por vírgula)
+
+    // SMTP
+    public string  $host          = '';
+    public int     $port          = 587;
+    public ?string $encryption    = 'tls';   // 'tls' | 'ssl' | null
+    public ?string $username      = null;
+    public ?string $password      = null;    // será armazenado criptografado
 
     public static function group(): string
     {
@@ -25,16 +30,17 @@ class EmailSettings extends Settings
     public static function defaults(): array
     {
         return [
-            'driver'       => 'smtp',
-            'host'         => '',
-            'port'         => 587,
-            'username'     => null,
-            'password'     => null,
-            'tls'          => true,
-            'from_address' => null,
-            'from_name'    => null,
-            'reply_to'     => null,
-            'bcc'          => null,
+            'driver'        => 'smtp',
+            'from_address'  => null,
+            'from_name'     => null,
+            'reply_to'      => null,
+            'bcc'           => null,
+
+            'host'          => '',
+            'port'          => 587,
+            'encryption'    => 'tls',
+            'username'      => null,
+            'password'      => null,
         ];
     }
 }
