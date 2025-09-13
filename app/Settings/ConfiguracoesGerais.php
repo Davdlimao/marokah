@@ -6,10 +6,10 @@ use Spatie\LaravelSettings\Settings;
 
 class ConfiguracoesGerais extends Settings
 {
-    public string $nome_do_site;
-    public bool $site_ativo;
-    public ?string $logotipo_do_site;
-    public string $moeda_padrao;
+    public string $nome_do_site = '';
+    public bool $site_ativo = true;
+    public ?string $logotipo_do_site = null;
+    public string $moeda_padrao = 'BRL';
 
     public static function group(): string
     {
