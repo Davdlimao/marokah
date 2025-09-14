@@ -55,15 +55,15 @@ class User extends Authenticatable implements FilamentUser
     {
         return match ($panel->getId()) {
             'marokah' => $this->hasRole('superadmin'),
-
+            'app'     => $this->hasAnyRole(['cliente-admin', 'operador', 'visualizador', 'superadmin']),
             // Painel único dos clientes
-            'app' => $this->hasAnyRole([
-                'tenant_admin',
-                'loja_admin','loja_operador',
-                'produtor_admin','produtor_operador',
-                'contabilidade_admin','contabilidade_operador',
-            ]),
-
+            //'app' => $this->hasAnyRole([
+            //    'tenant_admin',
+            //    'loja_admin','loja_operador',
+            //    'produtor_admin','produtor_operador',
+            //    'contabilidade_admin','contabilidade_operador',
+            //]),
+            
             default => false,
         };
     }
