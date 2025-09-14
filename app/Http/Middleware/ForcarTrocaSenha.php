@@ -11,10 +11,12 @@ class ForcarTrocaSenha
     {
         $user = $request->user();
 
-        if (! $user) {
-            return $next($request);
+        if ($user && ($user->must_change_password ?? false)) {
+        // evita loop quando já está na tela de alterar senha (GET/POST)
+        if (! $request->routeIs(['senha.alterar', 'senha.alterar.salvar'])) {
+            return redirect()->route('senha.alterar');
         }
-
+    }
         // rotas que não devem redirecionar
         if ($request->routeIs([
             'senha.alterar',
