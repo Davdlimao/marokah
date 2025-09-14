@@ -6,10 +6,12 @@ use App\Filament\Resources\Usuarios\UsuariosResource;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Actions;
 use Filament\Forms;
-use Filament\Notifications\Notification;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
+use Spatie\Permission\Models\Role;
 use App\Models\Convite;
 use App\Mail\ConviteUsuarioMail;
 use App\Support\EmailRuntime;
@@ -21,6 +23,9 @@ class ListUsuarios extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\CreateAction::make()
+                ->label('Novo usuário'),
+
             Actions\Action::make('convidar')
                 ->label('Convidar usuário')
                 ->icon('heroicon-o-paper-airplane')
@@ -29,73 +34,65 @@ class ListUsuarios extends ListRecords
                     Forms\Components\TextInput::make('email')
                         ->label('E-mail')
                         ->email()
-                        ->required()
-                        ->rule('unique:users,email'),
+                        ->required(),
+
                     Forms\Components\TextInput::make('nome')
-                        ->label('Nome')
-                        ->maxLength(100),
+                        ->label('Nome'),
+
+                    Forms\Components\Select::make('papeis')
+                        ->label('Papéis a atribuir')
+                        ->multiple()
+                        ->options(function () {
+                            // lista de papéis do guard web
+                            return Role::query()
+                                ->where('guard_name', 'web')
+                                ->orderBy('name')
+                                ->pluck('name', 'name')
+                                ->all();
+                        })
+                        ->helperText('Opcional — os papéis serão aplicados ao criar a conta.'),
+
                     Forms\Components\DateTimePicker::make('expira_em')
                         ->label('Expira em')
                         ->minDate(now())
                         ->default(now()->addDays(7)),
                 ])
-                ->action(function (array $data, Actions\Action $action) {
-                    // aplica as configs salvas (driver, host, porta, from, etc.)
-                    \App\Support\EmailRuntime::applyFromDb();
-
-                    // Garante que o 'from' está setado na config
-                    $fromAddress = config('mail.from.address');
-                    $fromName = config('mail.from.name');
-                    if (empty($fromAddress)) {
-                        config(['mail.from.address' => 'no-reply@' . parse_url(config('app.url'), PHP_URL_HOST) ?? 'localhost']);
-                    }
-                    if (empty($fromName)) {
-                        config(['mail.from.name' => config('app.name', 'Marokah')]);
+                // MUITO IMPORTANTE: o callback deve receber array $data
+                ->action(function (array $data) {
+                    // aplica e-mail runtime, se existir utilitário
+                    if (class_exists(\App\Support\EmailRuntime::class)) {
+                        \App\Support\EmailRuntime::applyFromDb();
                     }
 
-                    // token plano + hash guardado
+                    // gera token plano e hash que será validado na rota assinada
                     $tokenPlano = Str::random(64);
                     $hash       = hash('sha256', $tokenPlano);
 
                     $convite = Convite::create([
                         'email'            => $data['email'],
                         'nome'             => $data['nome'] ?? null,
-                        'papeis'           => null, // ajuste se for usar papéis
+                        'papeis'           => $data['papeis'] ?? null, // json
                         'token_hash'       => $hash,
                         'expira_em'        => $data['expira_em'] ?? now()->addDays(7),
-                        'convidado_por_id' => auth()->id(),
+                        'convidado_por_id' => auth()?->id(),
                     ]);
 
-                    // link assinado com expiração
-                    $url = route('convites.mostrar', [
-                        'convite' => $convite->id,
-                        'token'   => $tokenPlano,
-                    ]);
+                    // link assinado com validade
+                    $url = URL::temporarySignedRoute(
+                        'convites.mostrar',
+                        $convite->expira_em ?? now()->addDays(7),
+                        ['convite' => $convite->id, 'token' => $tokenPlano]
+                    );
 
-                    try {
-                        // envio síncrono (sem fila)
-                        Mail::to($convite->email)->send(new ConviteUsuarioMail($convite, $url));
+                    // envia o e-mail
+                    Mail::to($convite->email)->send(new ConviteUsuarioMail($convite, $url));
 
-                        Notification::make()
-                            ->title('Convite enviado!')
-                            ->body("Um convite foi enviado para **{$convite->email}**.")
-                            ->success()
-                            ->send();
-                    } catch (\Throwable $e) {
-                        $action->failure();
-
-                        Notification::make()
-                            ->title('Falha ao enviar o convite')
-                            ->body($e->getMessage())
-                            ->danger()
-                            ->send();
-                    }
-
-                    Mail::to($convite->email)->send(new \App\Mail\ConviteUsuarioMail($convite, $url));
+                    \Filament\Notifications\Notification::make()
+                        ->title('Convite enviado!')
+                        ->body("Um convite foi enviado para **{$convite->email}**.")
+                        ->success()
+                        ->send();
                 }),
-
-            // Se quiser impedir criação manual de usuários:
-            // Actions\CreateAction::make()->hidden(),
         ];
     }
 }

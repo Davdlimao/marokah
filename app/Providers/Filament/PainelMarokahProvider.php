@@ -74,6 +74,10 @@ class PainelMarokahProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+
+                \App\Http\Middleware\UsuarioAtivo::class,
+                \App\Http\Middleware\ForcarTrocaSenha::class,
+
             ])
             ->authMiddleware([Authenticate::class])
             ->navigationGroups([

@@ -2,8 +2,8 @@
 
 namespace App\Filament\Resources\Usuarios;
 
-use App\Filament\Resources\Usuarios\Pages\CreateUsuario;
-use App\Filament\Resources\Usuarios\Pages\EditUsuario;
+use App\Filament\Resources\Usuarios\Pages\CreateUsuarios;
+use App\Filament\Resources\Usuarios\Pages\EditUsuarios;
 use App\Filament\Resources\Usuarios\Pages\ListUsuarios;
 use App\Filament\Resources\Usuarios\Schemas\UsuarioForm;
 use App\Filament\Resources\Usuarios\Tables\UsuariosTable;
@@ -50,8 +50,8 @@ class UsuariosResource extends Resource
     {
         return [
             'index'  => ListUsuarios::route('/'),
-            'create' => CreateUsuario::route('/create'),
-            'edit'   => EditUsuario::route('/{record}/edit'),
+            'create' => CreateUsuarios::route('/create'),
+            'edit'   => EditUsuarios::route('/{record}/edit'),
         ];
     }
 }

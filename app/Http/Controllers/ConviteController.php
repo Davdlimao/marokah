@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Facades\DB;
 
 class ConviteController extends Controller
 {
@@ -64,10 +66,46 @@ class ConviteController extends Controller
             'password' => Hash::make($dados['senha']),
         ]);
 
-        // marque o convite como usado
-        $c->forceFill([
-            'usado_em' => now(),
-        ])->save();
+        $papeis = collect($c->papeis)->filter()->values()->all(); // nomes dos papéis
+
+        // cria ou recupera
+        $usuario = User::firstOrCreate(
+            ['email' => $c->email],
+            [
+                'name'              => $request->string('nome') ?: ($c->nome ?? ''),
+                'password'          => Hash::make($request->string('password')),
+                'email_verified_at' => now(),
+                'is_active'         => true, // se você tiver esta coluna
+            ],
+        );
+
+        DB::transaction(function () use ($c, $request) {
+            $user = User::create([
+                'name'     => $request->string('name'),
+                'email'    => $c->email,
+                'password' => Hash::make($request->string('password')),
+                'is_active' => true,
+            ]);
+
+            // aplica papéis do convite (array de nomes)
+            $papelNomes = collect($c->papeis ?? [])->filter()->values();
+            if ($papelNomes->isNotEmpty()) {
+                $roles = Role::query()
+                    ->whereIn('name', $papelNomes)
+                    ->where('guard_name', 'web')
+                    ->pluck('name')
+                    ->all();
+
+                if (!empty($roles)) {
+                    $user->syncRoles($roles);
+                }
+            }
+
+            $c->forceFill([
+                'usado_em'     => now(),
+                'usado_por_id' => $user->id,
+            ])->save();
+        });
 
         // autentica e redireciona
         auth()->login($user);

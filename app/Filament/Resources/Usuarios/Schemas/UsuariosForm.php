@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema as LaravelSchema;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Rules\Unique;
+use Spatie\Permission\Models\Role;
 
 class UsuarioForm
 {
@@ -16,59 +17,52 @@ class UsuarioForm
     {
         return $schema
             ->components([
-                Section::make('Dados do usuário')
+                Section::make('Dados pessoais')
                     ->columns(12)
-                    ->columnSpanFull()
                     ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label('Nome')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpan(6),
+                        Forms\Components\TextInput::make('name')->label('Nome')->required()->maxLength(255)->columnSpan(6),
+                        Forms\Components\TextInput::make('sobrenome')->label('Sobrenome')->maxLength(255)->columnSpan(6),
+                        Forms\Components\TextInput::make('telefone')->label('Telefone')->tel()->maxLength(30)->columnSpan(4),
+                        Forms\Components\TextInput::make('email')->label('E-mail')->email()->required()->unique(ignoreRecord: true)->columnSpan(8),
+                    ]),
 
-                        Forms\Components\TextInput::make('email')
-                            ->label('E-mail')
-                            ->email()
-                            ->required()
-                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
-                                return $rule;
-                            })
-                            ->columnSpan(6),
-
-                        // senha só grava se preenchida (não sobrescreve vazio no edit)
+                Section::make('Acesso')
+                    ->columns(12)
+                    ->schema([
                         Forms\Components\TextInput::make('password')
-                            ->label('Senha')
-                            ->password()
-                            ->revealable()
-                                ->rule(Password::default())
-                                ->validationMessages([
-                                    'min' => 'A senha deve ter no mínimo :min caracteres.',
-                                    'required' => 'Informe uma senha.',
-                                    'confirmed' => 'A confirmação da senha não confere.',
-                                ])
-                            ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
-                            ->dehydrated(fn ($state) => filled($state))
+                            ->label('Senha (opcional)')
+                            ->password()->revealable()
+                            ->dehydrateStateUsing(fn ($s) => filled($s) ? Hash::make($s) : null)
+                            ->dehydrated(fn ($s) => filled($s))
                             ->columnSpan(6),
 
                         Forms\Components\TextInput::make('password_confirmation')
-                            ->label('Confirmar senha')
-                            ->password()
-                            ->revealable()
-                            ->same('password')
-                            ->dehydrated(false)
-                            ->columnSpan(6),
+                            ->label('Confirmar senha')->password()->revealable()
+                            ->same('password')->dehydrated(false)->columnSpan(6),
 
-                        // Campo opcional (só use se tiver adicionado a coluna na migração abaixo)
+                        // apenas ao criar
+                        Forms\Components\Radio::make('modo_senha')
+                            ->label('Como entregar a senha?')
+                            ->options([
+                                'convite'  => 'Enviar link para definir senha',
+                                'temp'     => 'Gerar senha temporária (troca obrigatória no 1º login)',
+                                'definida' => 'Já defini acima',
+                            ])
+                            ->default('convite')
+                            ->columnSpan(12)
+                            ->visible(fn ($livewire) => $livewire instanceof \Filament\Resources\Pages\CreateRecord),
+
                         Forms\Components\Toggle::make('is_active')
-                            ->label('Ativo')
-                            ->visible(fn () => LaravelSchema::hasColumn('users', 'is_active'))
-                            ->columnSpan(3),
+                            ->label('Ativo')->default(true)->columnSpan(3),
 
                         Forms\Components\DateTimePicker::make('email_verified_at')
-                            ->label('Verificado em')
-                            ->helperText('Defina para marcar e-mail como verificado.')
-                            ->nullable()
-                            ->columnSpan(3),
+                            ->label('Verificado em')->nullable()->columnSpan(3),
+
+                        Forms\Components\Select::make('roles')
+                            ->label('Papéis')
+                            ->multiple()->preload()
+                            ->relationship('roles','name')
+                            ->columnSpan(12),
                     ]),
             ])
             ->columns(12);

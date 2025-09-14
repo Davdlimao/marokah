@@ -3,6 +3,8 @@
 namespace App\Support;
 
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class EmailRuntime
 {
@@ -83,7 +85,7 @@ class EmailRuntime
         }
 
         // (opcional) log leve p/ depurar (sem vazar senha)
-         \Log::info('SMTP runtime', [
+         Log::info('SMTP runtime', [
              'default'   => config('mail.default'),
              'host'      => config('mail.mailers.smtp.host'),
              'port'      => config('mail.mailers.smtp.port'),
@@ -98,7 +100,7 @@ class EmailRuntime
      */
     public static function applyFromDb(): void
     {
-        $row = \DB::table('settings')
+        $row = DB::table('settings')
             ->where('group', 'email')
             ->where('name', 'default')
             ->value('payload');

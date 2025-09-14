@@ -23,9 +23,9 @@ class User extends Authenticatable implements FilamentUser
      * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'name','sobrenome','telefone','email','password',
+        'is_active','must_change_password','email_verified_at',
+        'last_login_at','last_login_ip',
     ];
 
     /**
@@ -46,7 +46,11 @@ class User extends Authenticatable implements FilamentUser
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            'email_verified_at'   => 'datetime',
+            'is_active'           => 'boolean',
+            'must_change_password'=> 'boolean',
+            'last_login_at'       => 'datetime',
+            'last_login_ip'      => 'string',
             'password' => 'hashed',
         ];
     }
