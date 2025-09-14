@@ -166,11 +166,25 @@ class IntegracaoEmail extends SettingsPage
         $incoming = (array) $this->form->getState();
 
         // mantém senha atual se input veio vazio
+        // mantém/atualiza a senha:
         $currentRow = DB::table('settings')->where('group','email')->where('name','default')->first();
-        $currentRaw = $currentRow ? (array) json_decode($currentRow->payload, true) : [];
-        $current    = $this->decryptSecrets($currentRaw);
-        if (($incoming['password'] ?? null) === null && !empty($current['password'])) {
-            $incoming['password'] = $current['password'];
+        $current = $currentRow ? (array) json_decode($currentRow->payload, true) : [];
+
+        if (array_key_exists('password', $incoming)) {
+            // usuário digitou algo no campo?
+            if ($incoming['password'] === '' || $incoming['password'] === null) {
+                // mantém a anterior (enc:... ou password_encrypted)
+                if (!empty($current['password'])) {
+                    $incoming['password'] = $current['password'];
+                } elseif (!empty($current['password_encrypted'])) {
+                    $incoming['password'] = 'enc:' . $current['password_encrypted']; // converte para o novo padrão
+                } else {
+                    unset($incoming['password']);
+                }
+            } else {
+                // nova senha → persistir como enc:<encrypt()>
+                $incoming['password'] = 'enc:' . encrypt($incoming['password']);
+            }
         }
 
         // normaliza

@@ -1,0 +1,306 @@
+﻿
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\CreateUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateUsuario extends CreateRecord
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getCreatedNotificationTitle(): ?string
+    {
+        return 'UsuÃ¡rio criado com sucesso!';
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\EditUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\EditRecord;
+
+class EditUsuario extends EditRecord
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getSavedNotificationTitle(): ?string
+    {
+        return 'UsuÃ¡rio atualizado!';
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Pages\ListUsuarios.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Pages;
+
+use App\Filament\Resources\Usuarios\UsuariosResource;
+use Filament\Resources\Pages\ListRecords;
+
+class ListUsuarios extends ListRecords
+{
+    protected static string $resource = UsuariosResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            \Filament\Actions\CreateAction::make()
+                ->label('Novo usuÃ¡rio')
+                ->icon('heroicon-o-plus')
+                ->color('success'),
+        ];
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Schemas\UsuariosForm.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Schemas;
+
+use Filament\Schemas\Schema;
+use Filament\Schemas\Components\Section;
+use Filament\Forms;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema as LaravelSchema;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\Rules\Unique;
+
+class UsuarioForm
+{
+    public static function make(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Dados do usuÃ¡rio')
+                    ->columns(12)
+                    ->columnSpanFull()
+                    ->schema([
+                        Forms\Components\TextInput::make('name')
+                            ->label('Nome')
+                            ->required()
+                            ->maxLength(255)
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('email')
+                            ->label('E-mail')
+                            ->email()
+                            ->required()
+                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
+                                return $rule;
+                            })
+                            ->columnSpan(6),
+
+                        // senha sÃ³ grava se preenchida (nÃ£o sobrescreve vazio no edit)
+                        Forms\Components\TextInput::make('password')
+                            ->label('Senha')
+                            ->password()
+                            ->revealable()
+                                ->rule(Password::default())
+                                ->validationMessages([
+                                    'min' => 'A senha deve ter no mÃ­nimo :min caracteres.',
+                                    'required' => 'Informe uma senha.',
+                                    'confirmed' => 'A confirmaÃ§Ã£o da senha nÃ£o confere.',
+                                ])
+                            ->dehydrateStateUsing(fn ($state) => filled($state) ? Hash::make($state) : null)
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->columnSpan(6),
+
+                        Forms\Components\TextInput::make('password_confirmation')
+                            ->label('Confirmar senha')
+                            ->password()
+                            ->revealable()
+                            ->same('password')
+                            ->dehydrated(false)
+                            ->columnSpan(6),
+
+                        // Campo opcional (sÃ³ use se tiver adicionado a coluna na migraÃ§Ã£o abaixo)
+                        Forms\Components\Toggle::make('is_active')
+                            ->label('Ativo')
+                            ->visible(fn () => LaravelSchema::hasColumn('users', 'is_active'))
+                            ->columnSpan(3),
+
+                        Forms\Components\DateTimePicker::make('email_verified_at')
+                            ->label('Verificado em')
+                            ->helperText('Defina para marcar e-mail como verificado.')
+                            ->nullable()
+                            ->columnSpan(3),
+                    ]),
+            ])
+            ->columns(12);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\Tables\UsuariosTable.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios\Tables;
+
+use App\Models\User;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Actions\EditAction;
+use Filament\Actions\Action;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+use Filament\Actions\DeleteBulkAction;
+
+class UsuariosTable
+{
+    public static function make(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Nome')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('email')
+                    ->label('E-mail')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('email_verified_at')
+                    ->label('Verificado')
+                    ->state(fn ($r) => $r?->email_verified_at ? 'Sim' : 'NÃ£o')
+                    ->badge()
+                    ->color(fn ($r) => $r?->email_verified_at ? 'success' : 'gray')
+                    ->alignCenter(),
+
+                // SÃ³ exibe se a coluna existir
+                ...(
+                    Schema::hasColumn('users', 'is_active')
+                        ? [
+                            TextColumn::make('is_active')
+                                ->label('Ativo')
+                                ->state(fn ($r) => $r?->is_active ? 'Sim' : 'NÃ£o')
+                                ->badge()
+                                ->color(fn ($r) => $r?->is_active ? 'success' : 'danger')
+                                ->alignCenter(),
+                        ]
+                        : []
+                ),
+
+                TextColumn::make('created_at')
+                    ->label('Criado em')
+                    ->dateTime('d/m/Y H:i')
+                    ->sortable(),
+            ])
+            ->filters([
+                TernaryFilter::make('email_verified_at')
+                    ->label('Verificado')
+                    ->nullable(),
+
+                // SÃ³ exibe se a coluna existir
+                ...(
+                    Schema::hasColumn('users', 'is_active')
+                        ? [
+                            TernaryFilter::make('is_active')
+                                ->label('Ativo')
+                                ->nullable(),
+                        ]
+                        : []
+                ),
+            ])
+            ->actions([
+                Action::make('resetPassword')
+                    ->label('Resetar senha')
+                    ->icon('heroicon-o-key')
+                    ->requiresConfirmation()
+                    ->action(function (User $record) {
+                        $new = Str::random(10);
+                        $record->forceFill(['password' => Hash::make($new)])->save();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Nova senha gerada')
+                            ->body("Anote a senha temporÃ¡ria: **{$new}**")
+                            ->success()
+                            ->seconds(12)
+                            ->send();
+                    }),
+
+                EditAction::make()
+                    ->label('Editar'),
+
+                Action::make('delete')
+                    ->label('Excluir')
+                    ->color('danger')
+                    ->icon('heroicon-o-trash')
+                    ->requiresConfirmation()
+                    ->action(fn (User $r) => $r->delete())
+                    ->visible(fn ($r) => $r && $r instanceof User && $r->getKey() !== auth()->id())
+                    ->tooltip('NÃ£o Ã© possÃ­vel excluir a si mesmo'),
+            ])
+            ->bulkActions([
+                DeleteBulkAction::make()
+                    ->label('Excluir selecionados')
+                    ->deselectRecordsAfterCompletion(),
+            ]);
+    }
+}
+
+=== C:\Users\limao\marokah\app\Filament\Resources\Usuarios\UsuariosResource.php ===
+<?php
+
+namespace App\Filament\Resources\Usuarios;
+
+use App\Filament\Resources\Usuarios\Pages\CreateUsuario;
+use App\Filament\Resources\Usuarios\Pages\EditUsuario;
+use App\Filament\Resources\Usuarios\Pages\ListUsuarios;
+use App\Filament\Resources\Usuarios\Schemas\UsuarioForm;
+use App\Filament\Resources\Usuarios\Tables\UsuariosTable;
+use App\Models\User;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Filament\Support\Icons\Heroicon;
+
+class UsuariosResource extends Resource
+{
+    protected static ?string $model = User::class;
+
+    protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
+
+    protected static string|\UnitEnum|null $navigationGroup  = 'AdministraÃ§Ã£o';
+    protected static ?string $navigationLabel  = 'UsuÃ¡rios';
+    protected static ?string $modelLabel       = 'UsuÃ¡rio';
+    protected static ?string $pluralModelLabel = 'UsuÃ¡rios';
+    protected static ?int    $navigationSort   = 1;
+
+    // **mostra o menu sÃ³ para quem pode ver**
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
+    }
+
+    public static function canViewAny(): bool
+    {
+        return \Illuminate\Support\Facades\Gate::allows('viewAny', User::class);
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return UsuarioForm::make($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return UsuariosTable::make($table);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index'  => ListUsuarios::route('/'),
+            'create' => CreateUsuario::route('/create'),
+            'edit'   => EditUsuario::route('/{record}/edit'),
+        ];
+    }
+}
